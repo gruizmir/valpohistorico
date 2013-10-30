@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ValpoHistorico</string>
+    <string name="action_settings">Preferencias</string>
+    <string name="title_section1">Recomendado</string>
+    <string name="title_section2">Mapa</string>
+    <string name="title_section3">Información</string>
+
+</resources>
