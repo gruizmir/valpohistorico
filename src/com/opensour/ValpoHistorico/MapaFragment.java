@@ -102,7 +102,11 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		LatLng position = marker.getPosition();
 		String title = marker.getTitle();
 		if(onLocationClickListener != null){
-			onLocationClickListener.onLocationClick(title, position); 
+			Bundle extras = new Bundle();
+			extras.putString("name", title);
+			extras.putDouble("latitude", position.latitude);
+			extras.putDouble("longitude", position.longitude);
+			onLocationClickListener.onLocationClick(extras); 
 		}
 	}
 }

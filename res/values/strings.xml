@@ -6,5 +6,6 @@
     <string name="title_section1">Recomendado</string>
     <string name="title_section2">Mapa</string>
     <string name="title_section3">Información</string>
-
+    <string name="default_img_desc">Imagen</string>
+    <string name="next_here_text">Lugares importantes cerca de aquí</string>
 </resources>

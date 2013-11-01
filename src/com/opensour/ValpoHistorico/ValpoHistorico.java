@@ -20,6 +20,11 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	ViewPager mViewPager;
 	GoogleMap map;
+	private Bundle extras;
+	protected MapaFragment mFragment;
+	protected RecommendFragment rFragment;
+	protected InfoFragment iFragment;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,18 +81,20 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 
 		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
-			// Return a DummySectionFragment (defined as a static inner class
-			// below) with the page number as its lone argument.
 			switch(position){
 			case 0:
-				return new RecommendFragment();
+				RecommendFragment recommendFragment = new RecommendFragment();
+				rFragment = recommendFragment;
+				return recommendFragment;
 			case 1:
-				MapaFragment fragment = new MapaFragment();
-				fragment.setOnLocationClickListener(ValpoHistorico.this);
-				return fragment;
+				MapaFragment mapaFragment = new MapaFragment();
+				mapaFragment.setOnLocationClickListener(ValpoHistorico.this);
+				mFragment = mapaFragment;
+				return mapaFragment;
 			case 2:
-				return new InfoFragment();
+				InfoFragment infoFragment = new InfoFragment();
+				iFragment = infoFragment;
+				return infoFragment;
 			default:
 				MapaFragment fg = new MapaFragment();
 				fg.setOnLocationClickListener(ValpoHistorico.this);
@@ -117,8 +124,16 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 	}
 
 	@Override
-	public void onLocationClick(String locationName, LatLng position) {
+	public void onLocationClick(Bundle data) {
 		mViewPager.setCurrentItem(2);
+		extras = data;
+		if(extras!=null){
+			iFragment.setTitleText(extras.getString("name", "no existe"));
+			iFragment.setBodyText(extras.getString("body", ""));
+		}
+		else{
+			Log.e("vacio", "extras es null");
+		}
 	}
 
 }
