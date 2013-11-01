@@ -7,7 +7,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +15,17 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapaFragment extends Fragment implements LocationListener{
+public class MapaFragment extends Fragment implements LocationListener, OnInfoWindowClickListener{
 	public static final String ARG_SECTION_NUMBER = "section_number";
 	private GoogleMap map;
+	private OnLocationClickListener onLocationClickListener;
 	
 	public MapaFragment() {
 	}
@@ -47,9 +51,8 @@ public class MapaFragment extends Fragment implements LocationListener{
                 onLocationChanged(location);
             }
             locationManager.requestLocationUpdates(provider, 20000, 0, this);
+            addInfo(location);
         }
-		
-		
 		return rootView;
 	}
 	
@@ -60,6 +63,7 @@ public class MapaFragment extends Fragment implements LocationListener{
         LatLng latLng = new LatLng(latitude, longitude);
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         map.animateCamera(CameraUpdateFactory.zoomTo(15));
+        map.setOnInfoWindowClickListener(this);
     }
  
     @Override
@@ -77,4 +81,28 @@ public class MapaFragment extends Fragment implements LocationListener{
         // TODO Auto-generated method stub
     }
 	
+    
+    public void addInfo(Location location){
+    	map.addMarker(new MarkerOptions()
+    			.position(new LatLng(-33.038805,-71.629406))
+    			.title("Comandancia en Jefe de la Armada")
+    			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+    }
+
+	public OnLocationClickListener getOnLocationClickListener() {
+		return onLocationClickListener;
+	}
+
+	public void setOnLocationClickListener(OnLocationClickListener onLocationClickListener) {
+		this.onLocationClickListener = onLocationClickListener;
+	}
+
+	@Override
+	public void onInfoWindowClick(Marker marker) {
+		LatLng position = marker.getPosition();
+		String title = marker.getTitle();
+		if(onLocationClickListener != null){
+			onLocationClickListener.onLocationClick(title, position); 
+		}
+	}
 }

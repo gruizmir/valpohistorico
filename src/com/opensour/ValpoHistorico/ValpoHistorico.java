@@ -10,11 +10,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 
-public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabListener {
+public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabListener, OnLocationClickListener {
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	ViewPager mViewPager;
 	GoogleMap map;
@@ -82,11 +84,13 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 				return new RecommendFragment();
 			case 1:
 				MapaFragment fragment = new MapaFragment();
+				fragment.setOnLocationClickListener(ValpoHistorico.this);
 				return fragment;
 			case 2:
 				return new InfoFragment();
 			default:
 				MapaFragment fg = new MapaFragment();
+				fg.setOnLocationClickListener(ValpoHistorico.this);
 				return fg;
 			}
 		}
@@ -110,6 +114,11 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 			}
 			return null;
 		}
+	}
+
+	@Override
+	public void onLocationClick(String locationName, LatLng position) {
+		mViewPager.setCurrentItem(2);
 	}
 
 }
