@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.Menu;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 
 public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabListener, OnLocationClickListener {
 	SectionsPagerAdapter mSectionsPagerAdapter;
