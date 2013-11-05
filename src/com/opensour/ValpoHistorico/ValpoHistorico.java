@@ -129,6 +129,7 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 		if(extras!=null){
 			iFragment.setTitleText(extras.getString("name", "no existe"));
 			iFragment.setBodyText(extras.getString("body", ""));
+			iFragment.publishInfo();
 		}
 		else{
 			Log.e("vacio", "extras es null");

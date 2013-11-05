@@ -8,4 +8,5 @@
     <string name="title_section3">Información</string>
     <string name="default_img_desc">Imagen</string>
     <string name="next_here_text">Lugares importantes cerca de aquí</string>
+    <string name="default_info_title">Lugar histórico importante</string>
 </resources>

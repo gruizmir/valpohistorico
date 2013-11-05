@@ -1,9 +1,8 @@
 package com.opensour.ValpoHistorico;
 import java.util.ArrayList;
 import java.util.Iterator;
-
 import org.json.JSONArray;
-
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -15,11 +14,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -39,7 +36,9 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	private String urlBase = "http://tpsw.opensour.com/index.php/Especial:Ask&q=";
 	protected static JSONArray jsonArray;
 	private ArrayList<WikiObject> lista;
+	private LocationManager locationManager;
 	
+	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -48,10 +47,6 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			displayData(msg.getData().getString("api_response"));
 		}
 	};
-	
-	
-	public MapaFragment() {
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -67,7 +62,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this.getActivity(), requestCode);
 			dialog.show();
 		}else { // Google Play Services are available
-			LocationManager locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+			locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 			Criteria criteria = new Criteria();
 			String provider = locationManager.getBestProvider(criteria, true);
 			Location location = locationManager.getLastKnownLocation(provider);
@@ -75,7 +70,6 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 				onLocationChanged(location);
 			}
 			locationManager.requestLocationUpdates(provider, 20000, 0, this);
-			addInfo(location);
 		}
 		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
 		
@@ -95,27 +89,16 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		LatLng latLng = new LatLng(latitude, longitude);
 		map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 		map.animateCamera(CameraUpdateFactory.zoomTo(15));
-		map.setOnInfoWindowClickListener(this);
 	}
 
 	@Override
-	public void onProviderDisabled(String provider) {
-		// TODO Auto-generated method stub
-	}
+	public void onProviderDisabled(String provider) {}
 
 	@Override
-	public void onProviderEnabled(String provider) {
-		// TODO Auto-generated method stub
-	}
+	public void onProviderEnabled(String provider) {}
 
 	@Override
-	public void onStatusChanged(String provider, int status, Bundle extras) {
-		// TODO Auto-generated method stub
-	}
-
-
-	public void addInfo(Location location){
-	}
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
 
 	public OnLocationClickListener getOnLocationClickListener() {
 		return onLocationClickListener;
@@ -139,7 +122,9 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	}
 	
 	private void displayData(String csvFile){
-		ArrayList<WikiObject> lista = parseData(csvFile);
+		lista = parseData(csvFile);
+		ValpoApp myApp = (ValpoApp)this.getActivity().getApplication();
+		myApp.setLista(lista);
 		Iterator<WikiObject> it = lista.iterator();
 		LatLng latLng=null; 
 		while(it.hasNext()){
@@ -160,6 +145,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 			map.animateCamera(CameraUpdateFactory.zoomTo(15));
 		}
+		map.setOnInfoWindowClickListener(this);
 	}
 	
 	private ArrayList<WikiObject> parseData(String data){
@@ -188,5 +174,11 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		Message msg = new Message();
 		msg.setData(data);
 		mHandler.sendMessage(msg);
+	}
+	
+	@Override
+	public void onPause() {
+	    super.onPause();
+	    locationManager.removeUpdates(this);
 	}
 }

@@ -15,19 +15,32 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class WikiConnection extends AsyncTask<String, Integer, String> {
+	//Usado para obtener data desde la wiki semantica mediante consultas
 	private String urlBase = "http://tpsw.opensour.com/index.php?title=Especial:Ask&q=";
 	private String format="csv";
-	private String url;
-	public WikiConnection(){}
+	
+	//Usado para cualquier obtencion de datos
+	private String url=null;
 	public String resultData;
 	private OnDataReceivedListener onDataReceivedListener;
+	
+	//Utilizado para distinguir el tipo de informacion que fue solicitada. Ej: "raw", "render", "smw"
+	private String flag;
+	
+	public WikiConnection(){}
 	
 	public WikiConnection(String urlBase, String format){
 		this.urlBase = urlBase;
 		this.format = format;
 	}
-
+	
+	/**
+	 * Funcion usada para settear datos de la consulta a la wiki semantica.
+	 * @param queryArgs
+	 * @param requiredFields
+	 */
 	public void setInfo(String[] queryArgs, String[] requiredFields){
+		flag = "smw";
 		String query="";
 		for(int i=0; i<queryArgs.length; i++){
 			String temp = queryArgs[i].replace("=", "::");
@@ -75,12 +88,20 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	public void setFormat(String format) {
 		this.format = format;
 	}
+	
+	public void setFlag(String flag){
+		this.flag = flag;
+	}
 
 	@Override
 	protected String doInBackground(String... urls) {
 		try {
 			HttpClient httpclient = new DefaultHttpClient();
-			HttpResponse response = httpclient.execute(new HttpGet(url));
+			HttpResponse response;
+			if(url!=null)
+				response = httpclient.execute(new HttpGet(url));
+			else
+				response = httpclient.execute(new HttpGet(urls[0]));
 			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 			String sResponse;
 			StringBuilder s = new StringBuilder();
@@ -89,6 +110,7 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 			resultData = s.toString();
 			Bundle b = new Bundle();
 			b.putString("api_response", resultData);
+			b.putString("flag", flag);
 			this.onDataReceivedListener.onReceive(b);
 			return resultData;
 		} catch (Exception e) {
@@ -107,4 +129,5 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	public void setOnDataReceivedListener(OnDataReceivedListener onDataReceivedListener) {
 		this.onDataReceivedListener = onDataReceivedListener;
 	}
+		
 }
