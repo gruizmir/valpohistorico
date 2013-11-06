@@ -13,10 +13,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
@@ -37,6 +40,8 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private String imgAddress;
 	private List<Pair<String, LatLng>> nextList;
 	private ProgressDialog progressDialog;
+	private OnLocationClickListener onLocationClickListener;
+	public static final String ARG_SECTION_NUMBER = "section_number";
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -48,14 +53,6 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		}
 	};
 	
-	/**
-	 * The fragment argument representing the section number for this
-	 * fragment.
-	 */
-	public static final String ARG_SECTION_NUMBER = "section_number";
-
-	public InfoFragment() {
-	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -80,8 +77,6 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 
 	public void setTitleText(String titleText) {
 		this.titleText = titleText;
-		if(title!=null)
-			title.setText(titleText);
 	}
 	
 
@@ -123,11 +118,25 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		this.lista = lista;
 	}
 	
+	public OnLocationClickListener getOnLocationClickListener() {
+		return onLocationClickListener;
+	}
+
+	public void setOnLocationClickListener(
+			OnLocationClickListener onLocationClickListener) {
+		this.onLocationClickListener = onLocationClickListener;
+	}
+	
 	public void publishInfo(){
-		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
+		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando ".concat(titleText),true);
 		lista = ((ValpoApp) this.getActivity().getApplication()).getLista();
 		entry = select();
-		if(entry!=null){
+		if(entry!=null)
+			entry.retrieveData();
+		else{
+			entry = new WikiObject();
+			entry.setNombre(titleText);
+			entry.setOnDataReceivedListener(this);
 			entry.retrieveData();
 		}
 	}
@@ -147,7 +156,29 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	}
 
 	protected void showData() {
+		String ciudades = entry.getAtributos().get("Cerca de");
+		extraInfo.removeAllViews();
+		if(ciudades!=null){
+			String[] ciudadesCercanas = ciudades.split(",");
+			for(int i=0; i<ciudadesCercanas.length; i++){
+				Button btn = (Button) this.getLayoutInflater(null).inflate(R.layout.text_entry, null);
+				btn.setText(ciudadesCercanas[i]);
+				btn.setOnClickListener(new OnClickListener(){
+					@Override
+					public void onClick(View arg0) {
+						if(onLocationClickListener != null){
+							Bundle extras = new Bundle();
+							extras.putString("name", ((Button)arg0).getText().toString());
+							onLocationClickListener.onLocationClick(extras); 
+						}
+					}
+				});
+				extraInfo.addView(btn);
+			}
+		}
 		this.body.setText(Html.fromHtml(entry.getTexto()));
+		if(title!=null)
+			title.setText(titleText);
 	}
 	
 	@Override

@@ -93,6 +93,7 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 			case 2:
 				InfoFragment infoFragment = new InfoFragment();
 				iFragment = infoFragment;
+				iFragment.setOnLocationClickListener(ValpoHistorico.this);
 				return infoFragment;
 			default:
 				MapaFragment fg = new MapaFragment();
@@ -128,7 +129,6 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 		extras = data;
 		if(extras!=null){
 			iFragment.setTitleText(extras.getString("name", "no existe"));
-			iFragment.setBodyText(extras.getString("body", ""));
 			iFragment.publishInfo();
 		}
 		else{

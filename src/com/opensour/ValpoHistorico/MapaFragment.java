@@ -82,7 +82,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		conn.setOnDataReceivedListener(this);
 		String coordenadas;
 		if(location!=null){
-			String radio = "2000";
+			String radio = "20000";
 			coordenadas = Double.toString(location.getLatitude())
 					.concat(",")
 					.concat(Double.toString(location.getLongitude()))
