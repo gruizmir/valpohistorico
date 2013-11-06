@@ -1,7 +1,9 @@
 package com.opensour.ValpoHistorico;
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import org.json.JSONArray;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -14,9 +16,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,6 +41,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	protected static JSONArray jsonArray;
 	private ArrayList<WikiObject> lista;
 	private LocationManager locationManager;
+	private Location location;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -65,7 +70,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 			Criteria criteria = new Criteria();
 			String provider = locationManager.getBestProvider(criteria, true);
-			Location location = locationManager.getLastKnownLocation(provider);
+			location = locationManager.getLastKnownLocation(provider);
 			if(location!=null){
 				onLocationChanged(location);
 			}
@@ -75,7 +80,21 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		
 		WikiConnection conn = new WikiConnection();
 		conn.setOnDataReceivedListener(this);
-		String[] args = {"ubicado en=Valparaíso"};
+		String coordenadas;
+		if(location!=null){
+			String radio = "2000";
+			coordenadas = Double.toString(location.getLatitude())
+					.concat(",")
+					.concat(Double.toString(location.getLongitude()))
+					.concat(" (")
+					.concat(radio)
+					.concat(")");
+			coordenadas = "Tiene coordenadas=".concat(coordenadas);
+		}
+		else{
+			coordenadas= "ubicado en=Valparaíso";
+		}
+		String[] args = {coordenadas};
 		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
 		conn.setInfo(args, fields );
 		conn.execute(urlBase);
@@ -158,11 +177,19 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			WikiObject wikiTemp = new WikiObject();
 			wikiTemp.setNombre(temp[0]);
 			for(int j=1;j<headers.length; j++){
-				if(headers[j].equals("Categoría"))
-					wikiTemp.setCategoria(temp[j]);
-				else
-					if(!temp[j].equals(""))
-						wikiTemp.addAtributo(headers[j], temp[j]);
+				try{
+					if(headers[j].equals("Categoría"))
+						wikiTemp.setCategoria(temp[j]);
+					else
+						if(!temp[j].equals(""))
+							wikiTemp.addAtributo(headers[j], temp[j]);
+				}catch(IndexOutOfBoundsException ioe){
+					Log.e("OutOf", "Bounds", ioe);
+					continue;
+				}catch(NullPointerException npe){
+					Log.e("NullPointer", "Except", npe);
+					continue;
+				}
 			}
 			lista.add(wikiTemp);
 		}

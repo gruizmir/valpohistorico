@@ -60,8 +60,8 @@ public class WikiObject implements OnDataReceivedListener{
 		if(atributos==null)
 			atributos = new HashMap<String,String>();
 		if(key.equals("Tiene coordenadas")){
-			String lat = value.split(",")[0];
-			String lon = value.split(",")[1];
+			String lat = value.replace("\"", "").split(",")[0];
+			String lon = value.replace("\"", "").split(",")[1];
 			atributos.put("latitud", lat);
 			atributos.put("longitud", lon);
 		}
@@ -200,7 +200,7 @@ public class WikiObject implements OnDataReceivedListener{
 	}
 	
 	private String cleanText(String text){
-		String newText="";
+		String newText=text;
 		if(text.contains("id=\"map_google")){
 			newText = text.substring(0, text.indexOf("<div id=\"map_google"));
 			newText = newText.concat("</body></html>");
@@ -212,7 +212,6 @@ public class WikiObject implements OnDataReceivedListener{
 			temp1 = newText.substring(0, index);
 			temp2 = newText.substring(newText.indexOf("<span class=\"mw-headline\"", index));
 			newText = temp1.concat(temp2);
-			
 		}
 		return newText;
 	}
