@@ -3,6 +3,7 @@ package com.opensour.ValpoHistorico;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -22,6 +23,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -155,13 +157,14 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	}
 
 	protected void showData() {
-		String ciudades = entry.getAtributos().get("Cerca de");
+		//Agregando los elementos cercanos
+		String elementosCercanos = entry.getAtributos().get("Cerca de");
 		extraInfo.removeAllViews();
-		if(ciudades!=null){
-			String[] ciudadesCercanas = ciudades.split(",");
-			for(int i=0; i<ciudadesCercanas.length; i++){
+		if(elementosCercanos!=null){
+			String[] elem = elementosCercanos.split(",");
+			for(int i=0; i<elem.length; i++){
 				Button btn = (Button) this.getLayoutInflater(null).inflate(R.layout.text_entry, null);
-				btn.setText(ciudadesCercanas[i]);
+				btn.setText(elem[i]);
 				btn.setOnClickListener(new OnClickListener(){
 					@Override
 					public void onClick(View arg0) {
@@ -175,6 +178,21 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 				extraInfo.addView(btn);
 			}
 		}
+		
+		//Agregando los atributos del objecto.
+		this.infoTable.removeAllViews();
+		Set<String> col = entry.getAtributos().keySet();
+		Iterator<String> it = col.iterator();
+		while(it.hasNext()){
+			String key = it.next();
+			TableRow tr = (TableRow) this.getLayoutInflater(null).inflate(R.layout.table_row, null);
+			TextView tv = (TextView) tr.getChildAt(0);
+			Button tb = (Button) tr.getChildAt(1);
+			tv.setText(key);
+			tb.setText(entry.getAtributos().get(key));
+			infoTable.addView(tr);
+		}
+		
 		this.body.setText(Html.fromHtml(entry.getTexto()));
 		if(title!=null)
 			title.setText(titleText);
