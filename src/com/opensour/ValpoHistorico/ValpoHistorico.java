@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
 
@@ -135,5 +136,13 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 			Log.e("vacio", "extras es null");
 		}
 	}
-
+	
+	
+	public void shareOnFacebook(View v){
+		iFragment.shareOnFacebook();
+	}
+	
+	public void shareOnTwitter(View v){
+		iFragment.shareOnTwitter();
+	}
 }

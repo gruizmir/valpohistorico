@@ -1,5 +1,7 @@
 package com.opensour.ValpoHistorico;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -7,6 +9,7 @@ import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -14,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +30,8 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.maps.model.LatLng;
 
 public class InfoFragment extends Fragment implements OnDataReceivedListener {
@@ -43,6 +49,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private ProgressDialog progressDialog;
 	private OnLocationClickListener onLocationClickListener;
 	public static final String ARG_SECTION_NUMBER = "section_number";
+	private UiLifecycleHelper uiHelper;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -60,15 +67,13 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		View rootView = inflater.inflate(R.layout.info_layout, container, false);
 		title = (TextView) rootView.findViewById(R.id.info_title);
 		title.setText(this.titleText);
-		
 		body = (TextView) rootView.findViewById(R.id.info_body);
 		body.setText(this.bodyText);
-		
 		img = (ImageView) rootView.findViewById(R.id.info_image);
-		
 		infoTable = (TableLayout) rootView.findViewById(R.id.info_next_table);
 		extraInfo = (LinearLayout) rootView.findViewById(R.id.info_extra_data);
-		
+		uiHelper = new UiLifecycleHelper(this.getActivity(), null);
+	    uiHelper.onCreate(savedInstanceState);
 		return rootView;
 	}
 	
@@ -80,7 +85,6 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		this.titleText = titleText;
 	}
 	
-
 	public String getBodyText() {
 		return bodyText;
 	}
@@ -201,5 +205,83 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	@Override
 	public void onReceive(Bundle data) {
 		mHandler.sendEmptyMessage(0);
+	}
+	
+	public void shareOnFacebook(){
+		try {
+			String direc = "http://tpsw.opensour.com/index.php/" + URLEncoder.encode(this.titleText.replace(" ", "_"), "UTF-8");
+			FacebookDialog shareDialog = new FacebookDialog.ShareDialogBuilder(this.getActivity())
+	        .setLink(direc)
+	        .setDescription("Recorre Valparaíso con otra historia")
+	        .setName("ValpoHistorico")
+	        .setFragment(this)
+	        .build();
+			uiHelper.trackPendingDialogCall(shareDialog.present());
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+//		String direc;
+//		try {
+//			direc = "http://tpsw.opensour.com/index.php/" + URLEncoder.encode(this.titleText.replace(" ", "_"), "UTF-8");
+//			Log.e("url_fb", direc);
+//			OpenGraphAction action = GraphObject.Factory.create(OpenGraphAction.class);
+//			action.setProperty("lugar", direc);
+//			action.setType("lugar:visit");
+//			action.setMessage("Acabo de estar en " + this.titleText);
+//			
+//			FacebookDialog shareDialog = new FacebookDialog.OpenGraphActionDialogBuilder(this.getActivity(), action,  "lugar")
+//			        .build();
+//			uiHelper.trackPendingDialogCall(shareDialog.present());
+//		} catch (UnsupportedEncodingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+	}
+	
+	public void shareOnTwitter(){
+		
+	}
+	
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    super.onActivityResult(requestCode, resultCode, data);
+
+	    uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
+	        @Override
+	        public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
+	            Log.e("Activity", String.format("Error: %s", error.toString()));
+	        }
+
+	        @Override
+	        public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
+	            Log.i("Activity", "Success!");
+	        }
+	    });
+	}
+	
+	@Override
+	public void onResume() {
+	    super.onResume();
+	    uiHelper.onResume();
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+	    super.onSaveInstanceState(outState);
+	    uiHelper.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onPause() {
+	    super.onPause();
+	    uiHelper.onPause();
+	}
+
+	@Override
+	public void onDestroy() {
+	    super.onDestroy();
+	    uiHelper.onDestroy();
 	}
 }

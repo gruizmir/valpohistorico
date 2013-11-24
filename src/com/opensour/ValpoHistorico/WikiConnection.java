@@ -73,6 +73,50 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 					.concat("&eq=yes");
 	}
 	
+	
+	public void setInfo(String[] queryArgs, String[] unionArgs, String[] requiredFields){
+		flag = "smw";
+		String query="";
+		for(int i=0; i<queryArgs.length; i++){
+			String temp = queryArgs[i].replace("=", "::");
+			temp = new String("[[").concat(temp).concat(new String("]]"));
+			query = query.concat(temp);
+		}
+		
+		for(int i=0; i<unionArgs.length; i++){
+			String temp = unionArgs[i].replace("=", "::");
+			temp = new String("[[").concat(temp).concat(new String("]]"));
+			if(i!=unionArgs.length-1)
+				temp = temp.concat(" OR ");
+			query = query.concat(temp);
+		}
+		try {
+			query = URLEncoder.encode(query, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		
+		String fields = new String("");
+		for(int j=0; j<requiredFields.length; j++){
+			fields = fields.concat("?").concat(requiredFields[j]).concat("\n");
+		}
+		try {
+			fields = URLEncoder.encode(fields, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		url = urlBase
+					.concat(query)
+					.concat("&po=")
+					.concat(fields)
+					.concat("&eq=yes")
+					.concat("&p%5Bformat%5D=")
+					.concat(format)
+					.concat("&p%5Bsep%5D=%3B")
+					.concat("&eq=yes");
+//		Log.e("url", url);
+	}
+	
 	public String getUrlBase() {
 		return urlBase;
 	}
@@ -114,7 +158,8 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 			this.onDataReceivedListener.onReceive(b);
 			return resultData;
 		} catch (Exception e) {
-			Log.e("error", "mensaje", e);
+			e.printStackTrace();
+			Log.e("error", "error conexion", e);
 		}
 		return null;
 	}

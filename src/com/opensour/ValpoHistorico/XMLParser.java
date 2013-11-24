@@ -38,7 +38,14 @@ public class XMLParser {
 				if(entry.startsWith("property:") && !entry.startsWith("property:Fecha_de_modif")){
 					String key = this.extractName(entry);
 					NamedNodeMap map = property.getAttributes();
-					String value = this.extractValue(map.getNamedItem("rdf:resource").getTextContent());
+					String value="";
+					try{
+						value = this.extractValue(map.getNamedItem("rdf:resource").getTextContent());
+					}catch(NullPointerException e){
+					//	Log.e("parser", "Resource problem", e);
+						continue;
+					//	value = this.extractValue(property.getNodeValue());
+					}
 					atributos.put(key, value);
 				}
 			}

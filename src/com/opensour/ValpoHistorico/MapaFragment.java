@@ -26,13 +26,14 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapaFragment extends Fragment implements LocationListener, OnInfoWindowClickListener, OnDataReceivedListener{
+public class MapaFragment extends Fragment implements LocationListener, OnInfoWindowClickListener, OnDataReceivedListener, OnMarkerDragListener {
 	public static final String ARG_SECTION_NUMBER = "section_number";
 	private GoogleMap map;
 	private OnLocationClickListener onLocationClickListener;
@@ -42,14 +43,27 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	private ArrayList<WikiObject> lista;
 	private LocationManager locationManager;
 	private Location location;
+	private boolean lugaresReady=false;
+	private boolean hechosReady=false;
+	public final String FLAG_LUGARES = "lugares";
+	public final String FLAG_HECHOS = "hechos";
+	public final String RADIO = "2000";
+	private Marker myPosition;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			if(progressDialog!=null && progressDialog.isShowing())
-				progressDialog.dismiss();
-			displayData(msg.getData().getString("api_response"));
+			lista.addAll(parseData(msg.getData().getString("api_response")));
+			if(msg.getData().getString("flag", "default")==FLAG_LUGARES)
+				lugaresReady=true;
+			if(msg.getData().getString("flag", "default")==FLAG_HECHOS)
+				hechosReady=true;
+			if(lugaresReady && hechosReady){
+				displayData();
+				if(progressDialog!=null && progressDialog.isShowing())
+					progressDialog.dismiss();
+			}
 		}
 	};
 
@@ -73,31 +87,51 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			location = locationManager.getLastKnownLocation(provider);
 			if(location!=null){
 				onLocationChanged(location);
+				
 			}
 			locationManager.requestLocationUpdates(provider, 20000, 0, this);
 		}
 		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
-		
+		lista = new ArrayList<WikiObject>();
 		WikiConnection conn = new WikiConnection();
 		conn.setOnDataReceivedListener(this);
 		String coordenadas;
 		if(location!=null){
-			String radio = "20000";
 			coordenadas = Double.toString(location.getLatitude())
 					.concat(",")
 					.concat(Double.toString(location.getLongitude()))
 					.concat(" (")
-					.concat(radio)
+					.concat(RADIO)
 					.concat(")");
 			coordenadas = "Tiene coordenadas=".concat(coordenadas);
 		}
 		else{
+			Log.e("location", "null");
 			coordenadas= "ubicado en=Valparaíso";
 		}
+		Log.e("location_2", coordenadas);
 		String[] args = {coordenadas};
+		String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
 		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
-		conn.setInfo(args, fields );
+		conn.setInfo(args, categories, fields);
+		conn.setFlag(this.FLAG_LUGARES);
 		conn.execute(urlBase);
+		
+		WikiConnection hechosConn = new WikiConnection();
+		hechosConn.setOnDataReceivedListener(this);
+		String hechosCoord;
+		if(location!=null){
+			hechosCoord = coordenadas;
+		}
+		else{
+			hechosCoord= "ocurrido en=Valparaíso";
+		}
+		String[] hechosArgs = {hechosCoord};
+		String[] hechosCategories = {"Categoría:Hecho"};
+		String[] hechosFields = { "Categoría", "Tiene coordenadas"};
+		hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
+		hechosConn.setFlag(this.FLAG_HECHOS);
+		hechosConn.execute(urlBase);
 		return rootView;
 	}
 
@@ -107,7 +141,14 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		double longitude = location.getLongitude();
 		LatLng latLng = new LatLng(latitude, longitude);
 		map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-		map.animateCamera(CameraUpdateFactory.zoomTo(15));
+		map.animateCamera(CameraUpdateFactory.zoomTo(14));
+		myPosition = map.addMarker(new MarkerOptions()
+					.title("Desplázame!")
+					.draggable(true)
+					.position(latLng)
+					.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+				);
+		map.setOnMarkerDragListener(this);
 	}
 
 	@Override
@@ -140,8 +181,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		}
 	}
 	
-	private void displayData(String csvFile){
-		lista = parseData(csvFile);
+	private void displayData(){
 		ValpoApp myApp = (ValpoApp)this.getActivity().getApplication();
 		myApp.setLista(lista);
 		Iterator<WikiObject> it = lista.iterator();
@@ -153,17 +193,24 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 						Float.parseFloat(temp.searchAtributo("latitud")), 
 						Float.parseFloat(temp.searchAtributo("longitud"))
 						);
-				map.addMarker(new MarkerOptions()
+				if(temp.getCategoria()!=null && temp.getCategoria().equals("Hecho")){
+					map.addMarker(new MarkerOptions()
 								.title(temp.getNombre())
 								.position(latLng)
-								.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-						);
+								.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
+					);
+				}
+				else{
+					map.addMarker(new MarkerOptions()
+									.title(temp.getNombre())
+									.position(latLng)
+									.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+					);
+				}
 			}
 		}
-		if(latLng!=null){
-			map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-			map.animateCamera(CameraUpdateFactory.zoomTo(15));
-		}
+		map.moveCamera(CameraUpdateFactory.newLatLng(myPosition.getPosition()));
+		map.animateCamera(CameraUpdateFactory.zoomTo(14));
 		map.setOnInfoWindowClickListener(this);
 	}
 	
@@ -207,5 +254,69 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	public void onPause() {
 	    super.onPause();
 	    locationManager.removeUpdates(this);
+	}
+
+	@Override
+	public void onMarkerDrag(Marker marker) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMarkerDragEnd(Marker marker) {
+		map.clear();
+		myPosition = map.addMarker(new MarkerOptions()
+			.title("Desplázame!")
+			.draggable(true)
+			.position(marker.getPosition())
+			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+	);
+		LatLng position = marker.getPosition();
+		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
+		lista = new ArrayList<WikiObject>();
+		
+		WikiConnection conn = new WikiConnection();
+		conn.setOnDataReceivedListener(this);
+		String coordenadas;
+		if(position!=null){
+			coordenadas = Double.toString(position.latitude)
+					.concat(",")
+					.concat(Double.toString(position.longitude))
+					.concat(" (")
+					.concat(RADIO)
+					.concat(")");
+			coordenadas = "Tiene coordenadas=".concat(coordenadas);
+		}
+		else{
+			coordenadas= "ubicado en=Valparaíso";
+		}
+		String[] args = {coordenadas};
+		String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
+		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
+		conn.setInfo(args, categories, fields);
+		conn.setFlag(this.FLAG_LUGARES);
+		conn.execute(urlBase);
+		
+		WikiConnection hechosConn = new WikiConnection();
+		hechosConn.setOnDataReceivedListener(this);
+		String hechosCoord;
+		if(location!=null){
+			hechosCoord = coordenadas;
+		}
+		else{
+			hechosCoord= "ocurrido en=Valparaíso";
+		}
+		String[] hechosArgs = {hechosCoord};
+		String[] hechosCategories = {"Categoría:Hecho"};
+		String[] hechosFields = { "Categoría", "Tiene coordenadas"};
+		hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
+		hechosConn.setFlag(this.FLAG_HECHOS);
+		hechosConn.execute(urlBase);
+	}
+
+	@Override
+	public void onMarkerDragStart(Marker marker) {
+		// TODO Auto-generated method stub
+		
 	}
 }
