@@ -12,6 +12,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,8 +49,11 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private List<Pair<String, LatLng>> nextList;
 	private ProgressDialog progressDialog;
 	private OnLocationClickListener onLocationClickListener;
+	private OnRelatedSearchListener onRelatedSearchListener;
 	public static final String ARG_SECTION_NUMBER = "section_number";
+	public static final int TWITTER_ACTION = 10;
 	private UiLifecycleHelper uiHelper;
+	private String key;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -132,6 +136,14 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		this.onLocationClickListener = onLocationClickListener;
 	}
 	
+	public OnRelatedSearchListener getOnRelatedSearchListener() {
+		return onRelatedSearchListener;
+	}
+
+	public void setOnRelatedSearchListener(OnRelatedSearchListener onRelatedSearchListener) {
+		this.onRelatedSearchListener = onRelatedSearchListener;
+	}
+	
 	public void publishInfo(){
 		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando ".concat(titleText),true);
 		lista = ((ValpoApp) this.getActivity().getApplication()).getLista();
@@ -188,12 +200,26 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		Set<String> col = entry.getAtributos().keySet();
 		Iterator<String> it = col.iterator();
 		while(it.hasNext()){
-			String key = it.next();
+			key = it.next();
+			if(key.equals("latitud") || key.equals("longitud"))
+				continue;
 			TableRow tr = (TableRow) this.getLayoutInflater(null).inflate(R.layout.table_row, null);
 			TextView tv = (TextView) tr.getChildAt(0);
 			Button tb = (Button) tr.getChildAt(1);
 			tv.setText(key);
 			tb.setText(entry.getAtributos().get(key));
+			tb.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {
+					SearchObject obj = new SearchObject();
+					obj.setAttribute(key);
+					obj.setValue(entry.getAtributos().get(key));
+					if(key.equals("Tiene coordenadas"))
+						obj.setPosition(true);
+					onRelatedSearchListener.onRelatedSearch(obj);
+				}
+				
+			});
 			infoTable.addView(tr);
 		}
 		
@@ -214,6 +240,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	        .setLink(direc)
 	        .setDescription("Recorre Valparaíso con otra historia")
 	        .setName("ValpoHistorico")
+	        .setApplicationName("ValpoHistorico")
 	        .setFragment(this)
 	        .build();
 			uiHelper.trackPendingDialogCall(shareDialog.present());
@@ -221,33 +248,27 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//		String direc;
-//		try {
-//			direc = "http://tpsw.opensour.com/index.php/" + URLEncoder.encode(this.titleText.replace(" ", "_"), "UTF-8");
-//			Log.e("url_fb", direc);
-//			OpenGraphAction action = GraphObject.Factory.create(OpenGraphAction.class);
-//			action.setProperty("lugar", direc);
-//			action.setType("lugar:visit");
-//			action.setMessage("Acabo de estar en " + this.titleText);
-//			
-//			FacebookDialog shareDialog = new FacebookDialog.OpenGraphActionDialogBuilder(this.getActivity(), action,  "lugar")
-//			        .build();
-//			uiHelper.trackPendingDialogCall(shareDialog.present());
-//		} catch (UnsupportedEncodingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	public void shareOnTwitter(){
-		
+		try {
+			String text = "Estuve en " + this.titleText;
+			String valpoUrl ="http://tpsw.opensour.com/index.php/" + URLEncoder.encode(this.titleText.replace(" ", "_"), "UTF-8");
+			String tweetUrl = "https://twitter.com/intent/tweet?text=" + text + "&url=" + valpoUrl;
+			Uri uri = Uri.parse(tweetUrl);
+			startActivityForResult(new Intent(Intent.ACTION_VIEW, uri), TWITTER_ACTION);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
-
+    	if(requestCode==TWITTER_ACTION)
+    		return;
 	    uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
 	        @Override
 	        public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {

@@ -33,22 +33,42 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:orientation="horizontal"
+	        android:gravity="center_horizontal"
+	        android:layout_weight="1.0"
 	         >
             <Button
                 android:id="@+id/share_facebook"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="50sp"
                 android:text="@string/facebook"
                 android:onClick="shareOnFacebook"
+                android:background="@drawable/facebook_shape"
+                android:drawableLeft="@drawable/fb_logo"
+		        android:textColor="#FFFFFF"
+		        android:paddingLeft="30px"
+		        android:paddingTop="10px"
+		        android:paddingBottom="10px"
+                android:layout_weight="0.5"
+                android:layout_marginLeft="40px"
+                android:layout_marginRight="20px"
                 >
             </Button>
             
             <Button
                 android:id="@+id/share_twitter"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="50sp"
                 android:text="@string/twitter"
                 android:onClick="shareOnTwitter"
+                android:background="@drawable/twitter_shape"
+                android:layout_weight="0.5"
+                android:drawableLeft="@drawable/tw_logo"
+                android:textColor="#FFFFFF"
+                android:paddingLeft="30px"
+                android:paddingTop="10px"
+                android:paddingBottom="10px"
+                android:layout_marginLeft="20px"
+                android:layout_marginRight="40px"
                 >
             </Button>
         </LinearLayout>

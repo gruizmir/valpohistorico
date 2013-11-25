@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,19 +46,19 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	private Location location;
 	private boolean lugaresReady=false;
 	private boolean hechosReady=false;
-	public final String FLAG_LUGARES = "lugares";
-	public final String FLAG_HECHOS = "hechos";
 	public final String RADIO = "2000";
 	private Marker myPosition;
+	private View rootView;
+	private InfoParser parser = new InfoParser();
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			lista.addAll(parseData(msg.getData().getString("api_response")));
-			if(msg.getData().getString("flag", "default")==FLAG_LUGARES)
+			lista.addAll(parser.parseData(msg.getData().getString("api_response")));
+			if(msg.getData().getString("flag", "default")==WikiConnection.FLAG_LUGARES)
 				lugaresReady=true;
-			if(msg.getData().getString("flag", "default")==FLAG_HECHOS)
+			if(msg.getData().getString("flag", "default")==WikiConnection.FLAG_HECHOS)
 				hechosReady=true;
 			if(lugaresReady && hechosReady){
 				displayData();
@@ -69,7 +70,17 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.map_layout, container, false);
+		if (rootView != null) {
+	        ViewGroup parent = (ViewGroup) rootView.getParent();
+	        if (parent != null)
+	            parent.removeView(rootView);
+	    }
+	    try {
+	    	rootView = inflater.inflate(R.layout.map_layout, container, false);
+	    } catch (InflateException e) {
+	        /* map is already there, just return view as it is */
+	    }
+		
 		//aqui debe insertar un dialog para la espera
 		
 		SupportMapFragment fm = (SupportMapFragment) this.getFragmentManager().findFragmentById(R.id.map);
@@ -109,12 +120,11 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			Log.e("location", "null");
 			coordenadas= "ubicado en=Valparaíso";
 		}
-		Log.e("location_2", coordenadas);
 		String[] args = {coordenadas};
 		String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
 		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
 		conn.setInfo(args, categories, fields);
-		conn.setFlag(this.FLAG_LUGARES);
+		conn.setFlag(WikiConnection.FLAG_LUGARES);
 		conn.execute(urlBase);
 		
 		WikiConnection hechosConn = new WikiConnection();
@@ -130,7 +140,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		String[] hechosCategories = {"Categoría:Hecho"};
 		String[] hechosFields = { "Categoría", "Tiene coordenadas"};
 		hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
-		hechosConn.setFlag(this.FLAG_HECHOS);
+		hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
 		hechosConn.execute(urlBase);
 		return rootView;
 	}
@@ -214,35 +224,6 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		map.setOnInfoWindowClickListener(this);
 	}
 	
-	private ArrayList<WikiObject> parseData(String data){
-		ArrayList<WikiObject> lista = new ArrayList<WikiObject>(); 
-		String[] entradas = data.split("\"\"");
-		String[] headers = entradas[0].replace("\"", "").split(";");
-		
-		for(int i=1; i<entradas.length; i++){
-			String[] temp = entradas[i].replace("\"", "").split(";");
-			WikiObject wikiTemp = new WikiObject();
-			wikiTemp.setNombre(temp[0]);
-			for(int j=1;j<headers.length; j++){
-				try{
-					if(headers[j].equals("Categoría"))
-						wikiTemp.setCategoria(temp[j]);
-					else
-						if(!temp[j].equals(""))
-							wikiTemp.addAtributo(headers[j], temp[j]);
-				}catch(IndexOutOfBoundsException ioe){
-					Log.e("OutOf", "Bounds", ioe);
-					continue;
-				}catch(NullPointerException npe){
-					Log.e("NullPointer", "Except", npe);
-					continue;
-				}
-			}
-			lista.add(wikiTemp);
-		}
-		return lista;
-	}
-	
 	@Override
 	public void onReceive(Bundle data) {
 		Message msg = new Message();
@@ -269,8 +250,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			.title("Desplázame!")
 			.draggable(true)
 			.position(marker.getPosition())
-			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-	);
+			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 		LatLng position = marker.getPosition();
 		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
 		lista = new ArrayList<WikiObject>();
@@ -294,7 +274,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
 		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
 		conn.setInfo(args, categories, fields);
-		conn.setFlag(this.FLAG_LUGARES);
+		conn.setFlag(WikiConnection.FLAG_LUGARES);
 		conn.execute(urlBase);
 		
 		WikiConnection hechosConn = new WikiConnection();
@@ -310,7 +290,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		String[] hechosCategories = {"Categoría:Hecho"};
 		String[] hechosFields = { "Categoría", "Tiene coordenadas"};
 		hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
-		hechosConn.setFlag(this.FLAG_HECHOS);
+		hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
 		hechosConn.execute(urlBase);
 	}
 

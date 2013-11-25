@@ -15,6 +15,11 @@ import android.os.Bundle;
 import android.util.Log;
 
 public class WikiConnection extends AsyncTask<String, Integer, String> {
+	public static final String FLAG_LUGARES = "lugares";
+	public static final String FLAG_HECHOS = "hechos";
+	public static final String FLAG_BOTH = "ambos";
+	public static final String FLAG_SMW = "smw";
+	
 	//Usado para obtener data desde la wiki semantica mediante consultas
 	private String urlBase = "http://tpsw.opensour.com/index.php?title=Especial:Ask&q=";
 	private String format="csv";
@@ -25,7 +30,7 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	private OnDataReceivedListener onDataReceivedListener;
 	
 	//Utilizado para distinguir el tipo de informacion que fue solicitada. Ej: "raw", "render", "smw"
-	private String flag;
+	private String flag= "smw";
 	
 	public WikiConnection(){}
 	
@@ -40,7 +45,6 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	 * @param requiredFields
 	 */
 	public void setInfo(String[] queryArgs, String[] requiredFields){
-		flag = "smw";
 		String query="";
 		for(int i=0; i<queryArgs.length; i++){
 			String temp = queryArgs[i].replace("=", "::");
@@ -75,21 +79,23 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	
 	
 	public void setInfo(String[] queryArgs, String[] unionArgs, String[] requiredFields){
-		flag = "smw";
 		String query="";
+		String simpleQuery="";
 		for(int i=0; i<queryArgs.length; i++){
 			String temp = queryArgs[i].replace("=", "::");
 			temp = new String("[[").concat(temp).concat(new String("]]"));
-			query = query.concat(temp);
+			simpleQuery = simpleQuery.concat(temp);
 		}
-		
+		if(unionArgs.length==0)
+			query = simpleQuery;
 		for(int i=0; i<unionArgs.length; i++){
 			String temp = unionArgs[i].replace("=", "::");
 			temp = new String("[[").concat(temp).concat(new String("]]"));
 			if(i!=unionArgs.length-1)
 				temp = temp.concat(" OR ");
-			query = query.concat(temp);
+			query = query.concat(simpleQuery.concat(temp));
 		}
+		
 		try {
 			query = URLEncoder.encode(query, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
@@ -114,7 +120,6 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 					.concat(format)
 					.concat("&p%5Bsep%5D=%3B")
 					.concat("&eq=yes");
-//		Log.e("url", url);
 	}
 	
 	public String getUrlBase() {

@@ -4,13 +4,14 @@
     <string name="app_name" translatable="false">ValpoHistorico</string>
     <string name="app_id" translatable="false">552963598113169</string>
     <string name="action_settings" translatable="false">Preferencias</string>
-    <string name="title_section1" translatable="false">Recomendado</string>
-    <string name="title_section2" translatable="false">Mapa</string>
-    <string name="title_section3" translatable="false">Información</string>
+    <string name="title_section1" translatable="false">Mapa</string>
+    <string name="title_section2" translatable="false">Información</string>
+    <string name="title_section3" translatable="false">Recomendado</string>
     <string name="default_img_desc" translatable="false">Imagen</string>
     <string name="next_here_text" translatable="false">Lugares importantes cerca de aquí</string>
     <string name="default_info_title" translatable="false">Lugar histórico importante</string>
     <string name="extra_title_text" translatable="false">Resumen</string>
+    <string name="recommend_subtitle" translatable="false">Otros </string>
     <string name="facebook" translatable="false">Compartir en Facebook</string>
     <string name="twitter" translatable="false">Compartir en Twitter</string>
 </resources>

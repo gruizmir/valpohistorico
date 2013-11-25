@@ -16,7 +16,8 @@ import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
 
-public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabListener, OnLocationClickListener {
+public class ValpoHistorico extends FragmentActivity 
+	implements	ActionBar.TabListener, OnLocationClickListener, OnRelatedSearchListener {
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	ViewPager mViewPager;
 	GoogleMap map;
@@ -83,19 +84,21 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 		public Fragment getItem(int position) {
 			switch(position){
 			case 0:
-				RecommendFragment recommendFragment = new RecommendFragment();
-				rFragment = recommendFragment;
-				return recommendFragment;
-			case 1:
 				MapaFragment mapaFragment = new MapaFragment();
 				mapaFragment.setOnLocationClickListener(ValpoHistorico.this);
 				mFragment = mapaFragment;
 				return mapaFragment;
-			case 2:
+			case 1:
 				InfoFragment infoFragment = new InfoFragment();
 				iFragment = infoFragment;
 				iFragment.setOnLocationClickListener(ValpoHistorico.this);
+				iFragment.setOnRelatedSearchListener(ValpoHistorico.this);
 				return infoFragment;
+			case 2:
+				RecommendFragment recommendFragment = new RecommendFragment();
+				rFragment = recommendFragment;
+				rFragment.setOnLocationClickListener(ValpoHistorico.this);
+				return recommendFragment;
 			default:
 				MapaFragment fg = new MapaFragment();
 				fg.setOnLocationClickListener(ValpoHistorico.this);
@@ -126,7 +129,7 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 
 	@Override
 	public void onLocationClick(Bundle data) {
-		mViewPager.setCurrentItem(2);
+		mViewPager.setCurrentItem(1);
 		extras = data;
 		if(extras!=null){
 			iFragment.setTitleText(extras.getString("name", "no existe"));
@@ -144,5 +147,16 @@ public class ValpoHistorico extends FragmentActivity implements	ActionBar.TabLis
 	
 	public void shareOnTwitter(View v){
 		iFragment.shareOnTwitter();
+	}
+
+	@Override
+	public void onRelatedSearch(SearchObject obj) {
+		mViewPager.setCurrentItem(2);
+		rFragment.search(obj);
+	}
+	
+	@Override
+	public void onSearchReady() {
+		
 	}
 }
