@@ -31,6 +31,8 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	private final Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
+			if(!lista.isEmpty())
+				lista = new ArrayList<WikiObject>();
 			lista.addAll(parser.parseData(msg.getData().getString("api_response")));
 			showData();
 			if(progressDialog!=null && progressDialog.isShowing())
@@ -50,7 +52,8 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	
 	public void search(SearchObject obj){
 		String texto = this.getString(R.string.recommend_subtitle);
-		texto = texto.concat(obj.getAttribute())
+		texto = texto.concat(" ")
+				.concat(obj.getAttribute())
 				.concat(" ")
 				.concat(obj.getValue());
 		subtitle.setText(texto);
@@ -82,8 +85,9 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	
 	
 	protected void showData() {
-		Iterator<WikiObject> it = lista.iterator();
 		recommendList.removeAllViews();
+	    recommendList.refreshDrawableState();
+		Iterator<WikiObject> it = lista.iterator();
 		while(it.hasNext()){
 			WikiObject temp = it.next();
 			Button btn = (Button) this.getLayoutInflater(null).inflate(R.layout.recommend_entry, null);

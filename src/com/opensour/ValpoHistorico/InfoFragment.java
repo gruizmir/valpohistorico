@@ -54,6 +54,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	public static final int TWITTER_ACTION = 10;
 	private UiLifecycleHelper uiHelper;
 	private String key;
+	private String val;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -201,24 +202,20 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		Iterator<String> it = col.iterator();
 		while(it.hasNext()){
 			key = it.next();
+			val = entry.getAtributos().get(key);
 			if(key.equals("latitud") || key.equals("longitud"))
 				continue;
 			TableRow tr = (TableRow) this.getLayoutInflater(null).inflate(R.layout.table_row, null);
 			TextView tv = (TextView) tr.getChildAt(0);
 			Button tb = (Button) tr.getChildAt(1);
 			tv.setText(key);
-			tb.setText(entry.getAtributos().get(key));
+			tb.setText(val);
+			tb.setContentDescription(key);
 			tb.setOnClickListener(new OnClickListener(){
 				@Override
-				public void onClick(View arg0) {
-					SearchObject obj = new SearchObject();
-					obj.setAttribute(key);
-					obj.setValue(entry.getAtributos().get(key));
-					if(key.equals("Tiene coordenadas"))
-						obj.setPosition(true);
-					onRelatedSearchListener.onRelatedSearch(obj);
+				public void onClick(View arg0) {				
+					sendObj(((Button)arg0).getContentDescription().toString(), ((Button)arg0).getText().toString());
 				}
-				
 			});
 			infoTable.addView(tr);
 		}
@@ -304,5 +301,14 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	public void onDestroy() {
 	    super.onDestroy();
 	    uiHelper.onDestroy();
+	}
+	
+	public void sendObj(String attr, String value){
+ 		SearchObject obj = new SearchObject();
+		obj.setAttribute(attr);
+		obj.setValue(value);
+		if(attr.equals("Tiene coordenadas"))
+			obj.setPosition(true);
+		onRelatedSearchListener.onRelatedSearch(obj);
 	}
 }

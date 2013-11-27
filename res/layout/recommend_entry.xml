@@ -4,6 +4,5 @@
     android:layout_height="wrap_content"
     android:background="@drawable/cercanos_shape"
     android:textSize="18sp"
-    android:layout_marginBottom="3dp"
     android:clickable="true"
     />
