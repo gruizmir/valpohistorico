@@ -79,7 +79,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		title.setText(this.titleText);
 		body = (TextView) rootView.findViewById(R.id.info_body);
 		body.setText(this.bodyText);
-		img = (ImageView) rootView.findViewById(R.id.info_image);
+//		img = (ImageView) rootView.findViewById(R.id.info_image);
 		infoTable = (TableLayout) rootView.findViewById(R.id.info_next_table);
 		extraInfo = (LinearLayout) rootView.findViewById(R.id.info_extra_data);
 		uiHelper = new UiLifecycleHelper(this.getActivity(), null);
