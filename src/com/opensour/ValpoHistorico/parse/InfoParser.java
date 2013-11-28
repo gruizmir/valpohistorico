@@ -1,8 +1,10 @@
-package com.opensour.ValpoHistorico;
+package com.opensour.ValpoHistorico.parse;
 
 import java.util.ArrayList;
 
 import android.util.Log;
+
+import com.opensour.ValpoHistorico.WikiObject;
 
 public class InfoParser {
 	

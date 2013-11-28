@@ -6,6 +6,10 @@ import java.util.Map;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.opensour.ValpoHistorico.connection.WikiConnection;
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
+import com.opensour.ValpoHistorico.parse.XMLParser;
+
 public class WikiObject implements OnDataReceivedListener{
 	private String nombre;
 	private String texto;

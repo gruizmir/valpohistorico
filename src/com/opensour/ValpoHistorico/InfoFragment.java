@@ -34,6 +34,10 @@ import android.widget.TextView;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.maps.model.LatLng;
+import com.opensour.ValpoHistorico.connection.ServiceConnection;
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
+import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
+import com.opensour.ValpoHistorico.listeners.OnRelatedSearchListener;
 
 public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private TextView title;
@@ -55,6 +59,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private UiLifecycleHelper uiHelper;
 	private String key;
 	private String val;
+	private ServiceConnection sConnection;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -256,7 +261,8 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			startActivityForResult(new Intent(Intent.ACTION_VIEW, uri), TWITTER_ACTION);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.e("share", "twitter", e);
+			
 		}
 	}
 	
@@ -264,8 +270,18 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
-    	if(requestCode==TWITTER_ACTION)
+    	if(requestCode==TWITTER_ACTION){
+    		sConnection = new ServiceConnection();
+    		Bundle info = new Bundle();
+    		info.putString("name", titleText);
+            info.putString("twitter_share", "on");
+            info.putString("twitter_rate", "1");
+            info.putString("facebook_rate", "");
+            info.putString("smw_id", "");
+            sConnection.setInfo(info);
+            sConnection.execute();
     		return;
+    	}
 	    uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
 	        @Override
 	        public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
@@ -275,6 +291,17 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	        @Override
 	        public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
 	            Log.i("Activity", "Success!");
+	            
+	            //TODO definir "evaluacion voluntaria". Usuario elige si quiere o no poner el rating. 
+	            sConnection = new ServiceConnection();
+	            Bundle info = new Bundle();
+	            info.putString("name", titleText);
+	            info.putString("facebook_share", "on");
+	            info.putString("facebook_rate", "1");
+	            info.putString("twitter_rate", "");
+	            info.putString("smw_id", "");
+	            sConnection.setData(info);
+	            sConnection.execute();
 	        }
 	    });
 	}

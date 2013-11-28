@@ -33,6 +33,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.opensour.ValpoHistorico.connection.WikiConnection;
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
+import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
+import com.opensour.ValpoHistorico.parse.InfoParser;
 
 public class MapaFragment extends Fragment implements LocationListener, OnInfoWindowClickListener, OnDataReceivedListener, OnMarkerDragListener {
 	public static final String ARG_SECTION_NUMBER = "section_number";

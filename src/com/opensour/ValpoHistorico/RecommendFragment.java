@@ -17,6 +17,11 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.opensour.ValpoHistorico.connection.WikiConnection;
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
+import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
+import com.opensour.ValpoHistorico.parse.InfoParser;
+
 public class RecommendFragment extends Fragment implements OnDataReceivedListener {
 	public static final String ARG_SECTION_NUMBER = "section_number";
 	private String urlBase = "http://tpsw.opensour.com/index.php/Especial:Ask&q=";

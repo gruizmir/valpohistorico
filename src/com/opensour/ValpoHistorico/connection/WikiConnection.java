@@ -1,4 +1,4 @@
-package com.opensour.ValpoHistorico;
+package com.opensour.ValpoHistorico.connection;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,6 +13,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
 
 public class WikiConnection extends AsyncTask<String, Integer, String> {
 	public static final String FLAG_LUGARES = "lugares";
