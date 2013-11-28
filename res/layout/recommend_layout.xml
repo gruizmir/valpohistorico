@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" >
-    
-     <LinearLayout
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -12,27 +12,46 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         tools:context=".RecommendFragment" >
-        
-	    <TextView
-	        android:id="@+id/recommend_label"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_marginBottom="10sp"
-	        android:textAlignment="center"
-	        android:textStyle="bold"
-	        android:textSize="20dp"
-	        android:text="@string/recommend_subtitle"
-	    />
-	    
-	    <LinearLayout
-		    android:id="@+id/recommend_entry_list"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content"
-		    android:orientation="vertical"
-		    android:paddingRight="10dp"
-		    android:paddingLeft="10dp"
-		    >
-		</LinearLayout>
-		
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+            <Button
+                android:id="@+id/recommend_reload"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reload"
+                />
+            <TextView
+                android:id="@+id/recommend_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10sp"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/recommend_subtitle"
+                android:textAlignment="center"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+            <Button
+                android:id="@+id/recommend_hipster"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/hipster_mode"
+                android:layout_gravity="right"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/recommend_entry_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+        </LinearLayout>
     </LinearLayout>
+
 </ScrollView>

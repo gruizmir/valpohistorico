@@ -42,9 +42,7 @@ public class XMLParser {
 					try{
 						value = this.extractValue(map.getNamedItem("rdf:resource").getTextContent());
 					}catch(NullPointerException e){
-					//	Log.e("parser", "Resource problem", e);
 						continue;
-					//	value = this.extractValue(property.getNodeValue());
 					}
 					atributos.put(key, value);
 				}

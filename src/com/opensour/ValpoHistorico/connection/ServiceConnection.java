@@ -17,16 +17,22 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
 
 public class ServiceConnection extends AsyncTask<String, Integer, String> {
+	public static final int FLAG_VOTE = 0;
+	public static final int FLAG_BEST = 1;
+	public static final int FLAG_HIPSTER = 2;
 	private String urlBase = "http://ranking.opensour.com/rank/";
 	private Bundle data;
 	public String resultData;
+	private int flag=0;
 	private OnDataReceivedListener onDataReceivedListener;
 	private List<NameValuePair> valuePairs = new ArrayList<NameValuePair>();
 	
@@ -35,6 +41,26 @@ public class ServiceConnection extends AsyncTask<String, Integer, String> {
 	
 	public ServiceConnection(String urlBase){
 		this.setUrlBase(urlBase);
+	}
+	
+	/**
+	 * Verifica si existe algun tipo de conexion a internet activa, ya sea Wifi, 3G, o similar de datos.
+	 * @param cont Contexto actual de la actividad que llama a la funcion.
+	 * @return boolean true si existe al menos una conexion activa.
+	 */
+	public static boolean isConnected(Context cont){
+		Context c = cont.getApplicationContext();
+		ConnectivityManager connec =  (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if(connec == null)
+			return false;
+		NetworkInfo[] redes = connec.getAllNetworkInfo();
+		if(redes!=null){
+			for(int i=0; i<redes.length; i++){
+				if (redes[i].getState()	== NetworkInfo.State.CONNECTED)
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	public void setInfo(Bundle info){
@@ -63,8 +89,11 @@ public class ServiceConnection extends AsyncTask<String, Integer, String> {
 			resultData = s.toString();
 			Bundle b = new Bundle();
 			b.putString("api_response", resultData);
-			Log.e("ranking response", resultData);
-			//this.onDataReceivedListener.onReceive(b);
+//			Log.e("ranking response", resultData);
+			if(flag!=FLAG_VOTE){
+				b.putInt("flag", flag);
+				this.onDataReceivedListener.onReceive(b);
+			}
 			return resultData;
 	    } catch (ClientProtocolException e) {
 	    } catch (IOException e) {
@@ -94,5 +123,13 @@ public class ServiceConnection extends AsyncTask<String, Integer, String> {
 
 	public void setOnDataReceivedListener(OnDataReceivedListener onDataReceivedListener) {
 		this.onDataReceivedListener = onDataReceivedListener;
+	}
+	
+	public int getFlag() {
+		return flag;
+	}
+
+	public void setFlag(int flag) {
+		this.flag = flag;
 	}
 }

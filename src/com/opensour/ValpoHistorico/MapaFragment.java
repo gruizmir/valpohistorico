@@ -106,46 +106,48 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			}
 			locationManager.requestLocationUpdates(provider, 20000, 0, this);
 		}
-		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
 		lista = new ArrayList<WikiObject>();
-		WikiConnection conn = new WikiConnection();
-		conn.setOnDataReceivedListener(this);
-		String coordenadas;
-		if(location!=null){
-			coordenadas = Double.toString(location.getLatitude())
-					.concat(",")
-					.concat(Double.toString(location.getLongitude()))
-					.concat(" (")
-					.concat(RADIO)
-					.concat(")");
-			coordenadas = "Tiene coordenadas=".concat(coordenadas);
+		if(WikiConnection.isConnected(getActivity())){
+			progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
+			WikiConnection conn = new WikiConnection();
+			conn.setOnDataReceivedListener(this);
+			String coordenadas;
+			if(location!=null){
+				coordenadas = Double.toString(location.getLatitude())
+						.concat(",")
+						.concat(Double.toString(location.getLongitude()))
+						.concat(" (")
+						.concat(RADIO)
+						.concat(")");
+				coordenadas = "Tiene coordenadas=".concat(coordenadas);
+			}
+			else{
+				Log.e("location", "null");
+				coordenadas= "ubicado en=Valparaíso";
+			}
+			String[] args = {coordenadas};
+			String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
+			String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
+			conn.setInfo(args, categories, fields);
+			conn.setFlag(WikiConnection.FLAG_LUGARES);
+			conn.execute(urlBase);
+			
+			WikiConnection hechosConn = new WikiConnection();
+			hechosConn.setOnDataReceivedListener(this);
+			String hechosCoord;
+			if(location!=null){
+				hechosCoord = coordenadas;
+			}
+			else{
+				hechosCoord= "ocurrido en=Valparaíso";
+			}
+			String[] hechosArgs = {hechosCoord};
+			String[] hechosCategories = {"Categoría:Hecho"};
+			String[] hechosFields = { "Categoría", "Tiene coordenadas"};
+			hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
+			hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
+			hechosConn.execute(urlBase);
 		}
-		else{
-			Log.e("location", "null");
-			coordenadas= "ubicado en=Valparaíso";
-		}
-		String[] args = {coordenadas};
-		String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
-		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
-		conn.setInfo(args, categories, fields);
-		conn.setFlag(WikiConnection.FLAG_LUGARES);
-		conn.execute(urlBase);
-		
-		WikiConnection hechosConn = new WikiConnection();
-		hechosConn.setOnDataReceivedListener(this);
-		String hechosCoord;
-		if(location!=null){
-			hechosCoord = coordenadas;
-		}
-		else{
-			hechosCoord= "ocurrido en=Valparaíso";
-		}
-		String[] hechosArgs = {hechosCoord};
-		String[] hechosCategories = {"Categoría:Hecho"};
-		String[] hechosFields = { "Categoría", "Tiene coordenadas"};
-		hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
-		hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
-		hechosConn.execute(urlBase);
 		return rootView;
 	}
 
