@@ -1,0 +1,8 @@
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text_entry"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/cercanos_shape"
+    android:textSize="18sp"
+    android:clickable="true"
+    />

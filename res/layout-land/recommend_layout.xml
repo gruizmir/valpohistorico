@@ -18,35 +18,31 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:weightSum="1.0" >
-
+            android:paddingRight="10dp" >
             <Button
                 android:id="@+id/recommend_reload"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/reload"
-                android:layout_weight="0.5" />
-
+                />
+            <TextView
+                android:id="@+id/recommend_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10sp"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/recommend_subtitle"
+                android:textAlignment="center"
+                android:textSize="20dp"
+                android:textStyle="bold" />
             <Button
                 android:id="@+id/recommend_hipster"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
                 android:text="@string/hipster_mode"
-                android:layout_weight="0.5" />
+                android:layout_gravity="right"
+                />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/recommend_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="10sp"
-            android:text="@string/recommend_subtitle"
-            android:textAlignment="center"
-            android:textSize="20dp"
-            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/recommend_entry_list"

@@ -1,4 +1,4 @@
-package com.opensour.ValpoHistorico;
+package com.opensour.ValpoHistorico.connection;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,9 +10,14 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
 
 public class WikiConnection extends AsyncTask<String, Integer, String> {
 	public static final String FLAG_LUGARES = "lugares";
@@ -37,6 +42,26 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	public WikiConnection(String urlBase, String format){
 		this.urlBase = urlBase;
 		this.format = format;
+	}
+	
+	/**
+	 * Verifica si existe algun tipo de conexion a internet activa, ya sea Wifi, 3G, o similar de datos.
+	 * @param cont Contexto actual de la actividad que llama a la funcion.
+	 * @return boolean true si existe al menos una conexion activa.
+	 */
+	public static boolean isConnected(Context cont){
+		Context c = cont.getApplicationContext();
+		ConnectivityManager connec =  (ConnectivityManager)c.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if(connec == null)
+			return false;
+		NetworkInfo[] redes = connec.getAllNetworkInfo();
+		if(redes!=null){
+			for(int i=0; i<redes.length; i++){
+				if (redes[i].getState()	== NetworkInfo.State.CONNECTED)
+					return true;
+			}
+		}
+		return false;
 	}
 	
 	/**

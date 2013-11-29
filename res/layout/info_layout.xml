@@ -13,13 +13,6 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         tools:context=".InfoFragment" >
 
-        <ImageView
-            android:id="@+id/info_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/default_img_desc"
-            android:src="@drawable/ic_launcher" />
-
         <TextView
             android:id="@+id/info_title"
             android:layout_width="match_parent"
@@ -28,90 +21,83 @@
             android:text="@string/default_info_title"
             android:textSize="24sp"
             android:textStyle="bold" />
-        
-        <LinearLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:orientation="horizontal"
-	        android:gravity="center_horizontal"
-	        android:layout_weight="1.0"
-	         >
-            <Button
-                android:id="@+id/share_facebook"
-                android:layout_width="wrap_content"
-                android:layout_height="50sp"
-                android:text="@string/facebook"
-                android:onClick="shareOnFacebook"
-                android:background="@drawable/facebook_shape"
-                android:drawableLeft="@drawable/fb_logo"
-		        android:textColor="#FFFFFF"
-		        android:paddingLeft="30px"
-		        android:paddingTop="10px"
-		        android:paddingBottom="10px"
-                android:layout_weight="0.5"
-                android:layout_marginLeft="40px"
-                android:layout_marginRight="20px"
-                >
-            </Button>
-            
-            <Button
-                android:id="@+id/share_twitter"
-                android:layout_width="wrap_content"
-                android:layout_height="50sp"
-                android:text="@string/twitter"
-                android:onClick="shareOnTwitter"
-                android:background="@drawable/twitter_shape"
-                android:layout_weight="0.5"
-                android:drawableLeft="@drawable/tw_logo"
-                android:textColor="#FFFFFF"
-                android:paddingLeft="30px"
-                android:paddingTop="10px"
-                android:paddingBottom="10px"
-                android:layout_marginLeft="20px"
-                android:layout_marginRight="40px"
-                >
-            </Button>
-        </LinearLayout>
-        
+
+        <Button
+            android:id="@+id/share_facebook"
+            android:layout_width="wrap_content"
+            android:layout_height="50sp"
+            android:layout_marginLeft="40px"
+            android:layout_marginRight="20px"
+            android:layout_weight="0.5"
+            android:background="@drawable/facebook_shape"
+            android:drawableLeft="@drawable/fb_logo"
+            android:onClick="shareOnFacebook"
+            android:paddingBottom="10px"
+            android:paddingLeft="30px"
+            android:paddingTop="10px"
+            android:text="@string/facebook"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/share_twitter"
+            android:layout_width="wrap_content"
+            android:layout_height="50sp"
+            android:layout_marginLeft="20px"
+            android:layout_marginRight="40px"
+            android:layout_weight="0.5"
+            android:background="@drawable/twitter_shape"
+            android:drawableLeft="@drawable/tw_logo"
+            android:onClick="shareOnTwitter"
+            android:paddingBottom="10px"
+            android:paddingLeft="30px"
+            android:paddingTop="10px"
+            android:text="@string/twitter"
+            android:textColor="#FFFFFF" />
+
+        <ImageView
+            android:id="@+id/info_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/default_img_desc"
+            android:src="@drawable/ic_launcher" />
+
         <TextView
             android:id="@+id/info_next_here"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="10dp"
             android:text="@string/next_here_text"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:id="@+id/info_extra_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingRight="10dp"
             android:paddingLeft="10dp"
-            >
+            android:paddingRight="10dp" >
         </LinearLayout>
-        
+
         <TextView
             android:id="@+id/info_extra_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="10dp"
             android:text="@string/extra_title_text"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp" />
-        
+            android:textStyle="bold" />
+
         <TableLayout
             android:id="@+id/info_next_table"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" 
-            android:stretchColumns="*"
+            android:layout_height="wrap_content"
             android:shrinkColumns="*"
-            >
+            android:stretchColumns="*" >
         </TableLayout>
-        
+
         <TextView
             android:id="@+id/info_body"
             android:layout_width="match_parent"

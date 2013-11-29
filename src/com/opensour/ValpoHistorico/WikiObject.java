@@ -6,10 +6,17 @@ import java.util.Map;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.opensour.ValpoHistorico.connection.WikiConnection;
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
+import com.opensour.ValpoHistorico.parse.XMLParser;
+
 public class WikiObject implements OnDataReceivedListener{
 	private String nombre;
 	private String texto;
 	private String categoria;
+	private int facebookCount = 0;
+	private int twitterCount = 0;
+	private int totalCount = 0;
 	private Map<String, String> atributos;
 	private Boolean textoReceived = false;
 	private Boolean atributosReceived = false;
@@ -38,13 +45,45 @@ public class WikiObject implements OnDataReceivedListener{
 	public void setCategoria(String categoria) {
 		this.categoria = categoria.replace("Categoría:", "");
 	}
+	
+	public int getFacebookCount() {
+		return facebookCount;
+	}
 
+	public void setFacebookCount(int facebookCount) {
+		this.facebookCount = facebookCount;
+	}
+
+	public int getTwitterCount() {
+		return twitterCount;
+	}
+
+	public void setTwitterCount(int twitterCount) {
+		this.twitterCount = twitterCount;
+	}
+
+	public int getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(int totalCount) {
+		this.totalCount = totalCount;
+	}
+	
 	public Map<String, String> getAtributos() {
 		return atributos;
 	}
 
 	public void setAtributos(Map<String, String> atributos) {
 		this.atributos = atributos;
+	}
+	
+	public OnDataReceivedListener getOnDataReceivedListener() {
+		return onDataReceivedListener;
+	}
+
+	public void setOnDataReceivedListener(OnDataReceivedListener onDataReceivedListener) {
+		this.onDataReceivedListener = onDataReceivedListener;
 	}
 	
 	public void addAtributo(String key, String value){
@@ -100,15 +139,6 @@ public class WikiObject implements OnDataReceivedListener{
 		return newText;
 	}
 	
-
-	public OnDataReceivedListener getOnDataReceivedListener() {
-		return onDataReceivedListener;
-	}
-
-	public void setOnDataReceivedListener(OnDataReceivedListener onDataReceivedListener) {
-		this.onDataReceivedListener = onDataReceivedListener;
-	}
-	
 	@Override
 	public void onReceive(Bundle data) {
 		String flag = data.getString("flag", "default");
@@ -134,5 +164,3 @@ public class WikiObject implements OnDataReceivedListener{
 			return;
 	}
 }
-
-

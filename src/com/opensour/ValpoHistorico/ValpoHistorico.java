@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.View;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
+import com.opensour.ValpoHistorico.listeners.OnRelatedSearchListener;
 
 public class ValpoHistorico extends FragmentActivity 
 	implements	ActionBar.TabListener, OnLocationClickListener, OnRelatedSearchListener {

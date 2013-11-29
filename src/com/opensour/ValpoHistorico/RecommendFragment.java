@@ -17,6 +17,13 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.opensour.ValpoHistorico.connection.ServiceConnection;
+import com.opensour.ValpoHistorico.connection.WikiConnection;
+import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
+import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
+import com.opensour.ValpoHistorico.parse.InfoParser;
+import com.opensour.ValpoHistorico.parse.JSONParser;
+
 public class RecommendFragment extends Fragment implements OnDataReceivedListener {
 	public static final String ARG_SECTION_NUMBER = "section_number";
 	private String urlBase = "http://tpsw.opensour.com/index.php/Especial:Ask&q=";
@@ -26,17 +33,26 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	private InfoParser parser = new InfoParser();
 	private LinearLayout recommendList;
 	private TextView subtitle;
+	private JSONParser jsonParser = new JSONParser();
 			
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
-			if(!lista.isEmpty())
-				lista = new ArrayList<WikiObject>();
-			lista.addAll(parser.parseData(msg.getData().getString("api_response")));
-			showData();
-			if(progressDialog!=null && progressDialog.isShowing())
-				progressDialog.dismiss();
+			if(msg.getData().getString("flag", "").equals(WikiConnection.FLAG_BOTH)){
+				if(!lista.isEmpty())
+					lista = new ArrayList<WikiObject>();
+				lista.addAll(parser.parseData(msg.getData().getString("api_response")));
+				showData();
+				if(progressDialog!=null && progressDialog.isShowing())
+					progressDialog.dismiss();
+			}
+			else if(msg.getData().getInt("flag", -1)==ServiceConnection.FLAG_BEST){
+				showRecomendedList(true, jsonParser.parse(msg.getData().getString("api_response")));
+			}
+			else if(msg.getData().getInt("flag", -1)==ServiceConnection.FLAG_HIPSTER){
+				showRecomendedList(true, jsonParser.parse(msg.getData().getString("api_response")));
+			}
 		}
 	};
 
@@ -46,6 +62,22 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 		recommendList = (LinearLayout)rootView.findViewById(R.id.recommend_entry_list);
 		lista = new ArrayList<WikiObject>();
 		subtitle = (TextView) rootView.findViewById(R.id.recommend_label);
+		Button reloadButton = (Button) rootView.findViewById(R.id.recommend_reload);
+		reloadButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View arg0) {
+				searchInitialRecommendation(true);
+			}
+		});
+		
+		Button hipsterButton = (Button) rootView.findViewById(R.id.recommend_hipster);
+		hipsterButton.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View arg0) {
+				searchInitialRecommendation(false);
+			}
+		});
+		searchInitialRecommendation(true);
 		return rootView;
 	}
 	
@@ -76,7 +108,9 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 
 	@Override
 	public void onReceive(Bundle data) {
-		if(data.getSerializable("flag").equals(WikiConnection.FLAG_BOTH)){
+		if(data.getString("flag", "").equals(WikiConnection.FLAG_BOTH) ||
+				data.getInt("flag", -1)==ServiceConnection.FLAG_BEST || 
+				data.getInt("flag", -1)==ServiceConnection.FLAG_HIPSTER){
 			Message msg = new Message();
 			msg.setData(data);
 			mHandler.sendMessage(msg);
@@ -106,6 +140,56 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 		}
 	}
 	
+	
+	private void searchInitialRecommendation(boolean isBest){
+		String initialURL;
+		int flag;
+		if(isBest){
+			initialURL = "http://ranking.opensour.com/best/";
+			flag = ServiceConnection.FLAG_BEST;
+		}
+		else{
+			initialURL = "http://ranking.opensour.com/hipster/";
+			flag = ServiceConnection.FLAG_HIPSTER;
+		}
+		ServiceConnection sConnection = new ServiceConnection(initialURL);
+		sConnection.setFlag(flag);
+		sConnection.setOnDataReceivedListener(this);
+		Bundle info = new Bundle();
+        info.putString("cant", "6");
+        sConnection.setInfo(info);
+        sConnection.execute();
+	}
+	
+	private void showRecomendedList(boolean isBest, ArrayList<WikiObject> lista){
+		if(lista==null)
+			return;
+		if(isBest){
+			subtitle.setText("Los mejores recomendados");
+		}
+		else{
+			subtitle.setText("Los lugares menos visitados (Hipster Mode)");
+		}
+		recommendList.removeAllViews();
+	    recommendList.refreshDrawableState();
+		Iterator<WikiObject> it = lista.iterator();
+		while(it.hasNext()){
+			WikiObject temp = it.next();
+			Button btn = (Button) this.getLayoutInflater(null).inflate(R.layout.recommend_entry, null);
+			btn.setText(temp.getNombre());
+			btn.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {
+					if(onLocationClickListener != null){
+						Bundle extras = new Bundle();
+						extras.putString("name", ((Button)arg0).getText().toString());
+						onLocationClickListener.onLocationClick(extras); 
+					}
+				}
+			});
+			recommendList.addView(btn);
+		}
+	}
 	
 	public OnLocationClickListener getOnLocationClickListener() {
 		return onLocationClickListener;
