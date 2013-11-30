@@ -1,7 +1,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="match_parent"
+    android:background="#FFcae4ff" >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,48 +18,62 @@
             android:id="@+id/info_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:gravity="center_horizontal"
             android:text="@string/default_info_title"
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/share_facebook"
-            android:layout_width="wrap_content"
-            android:layout_height="50sp"
-            android:layout_marginLeft="40px"
-            android:layout_marginRight="20px"
-            android:layout_weight="0.5"
-            android:background="@drawable/facebook_shape"
-            android:drawableLeft="@drawable/fb_logo"
-            android:onClick="shareOnFacebook"
-            android:paddingBottom="10px"
-            android:paddingLeft="30px"
-            android:paddingTop="10px"
-            android:text="@string/facebook"
-            android:textColor="#FFFFFF" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:weightSum="1.0" >
 
-        <Button
-            android:id="@+id/share_twitter"
-            android:layout_width="wrap_content"
-            android:layout_height="50sp"
-            android:layout_marginLeft="20px"
-            android:layout_marginRight="40px"
-            android:layout_weight="0.5"
-            android:background="@drawable/twitter_shape"
-            android:drawableLeft="@drawable/tw_logo"
-            android:onClick="shareOnTwitter"
-            android:paddingBottom="10px"
-            android:paddingLeft="30px"
-            android:paddingTop="10px"
-            android:text="@string/twitter"
-            android:textColor="#FFFFFF" />
+            <Button
+                android:id="@+id/share_facebook"
+                android:layout_width="0dip"
+                android:layout_height="50sp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginRight="5dp"
+                android:layout_weight="0.5"
+                android:background="@drawable/facebook_shape"
+                android:drawableLeft="@drawable/fb_logo"
+                android:onClick="shareOnFacebook"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/facebook"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/share_twitter"
+                android:layout_width="0dip"
+                android:layout_height="50sp"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="0.5"
+                android:background="@drawable/twitter_shape"
+                android:drawableLeft="@drawable/tw_logo"
+                android:onClick="shareOnTwitter"
+                android:paddingBottom="10dp"
+                android:paddingLeft="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/twitter"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/info_image"
-            android:layout_width="wrap_content"
+            android:layout_width="170dp"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:contentDescription="@string/default_img_desc"
+            android:maxHeight="160dp"
+            android:minHeight="140dp"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_launcher" />
 
         <TextView
