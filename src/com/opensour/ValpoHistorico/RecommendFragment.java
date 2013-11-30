@@ -34,7 +34,9 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	private LinearLayout recommendList;
 	private TextView subtitle;
 	private JSONParser jsonParser = new JSONParser();
-			
+	private String retrievedString=null;
+	private int retrievedFlag;
+	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
 		@Override
@@ -44,15 +46,19 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 					lista = new ArrayList<WikiObject>();
 				lista.addAll(parser.parseData(msg.getData().getString("api_response")));
 				showData();
-				if(progressDialog!=null && progressDialog.isShowing())
-					progressDialog.dismiss();
 			}
 			else if(msg.getData().getInt("flag", -1)==ServiceConnection.FLAG_BEST){
-				showRecomendedList(true, jsonParser.parse(msg.getData().getString("api_response")));
+				retrievedFlag = msg.getData().getInt("flag", -1); 
+				retrievedString = msg.getData().getString("api_response");
+				showRecomendedList(true, jsonParser.parse(retrievedString));
 			}
 			else if(msg.getData().getInt("flag", -1)==ServiceConnection.FLAG_HIPSTER){
-				showRecomendedList(true, jsonParser.parse(msg.getData().getString("api_response")));
+				retrievedFlag = msg.getData().getInt("flag", -1);
+				retrievedString = msg.getData().getString("api_response");
+				showRecomendedList(true, jsonParser.parse(retrievedString));
 			}
+			if(progressDialog!=null && progressDialog.isShowing())
+				progressDialog.dismiss();
 		}
 	};
 
@@ -77,7 +83,14 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 				searchInitialRecommendation(false);
 			}
 		});
-		searchInitialRecommendation(true);
+		
+		if(savedInstanceState==null)
+			searchInitialRecommendation(true);
+		else{
+			Message msg = new Message();
+			msg.setData(savedInstanceState);
+			mHandler.sendMessage(msg);
+		}
 		return rootView;
 	}
 	
@@ -144,6 +157,7 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	private void searchInitialRecommendation(boolean isBest){
 		String initialURL;
 		int flag;
+		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
 		if(isBest){
 			initialURL = "http://ranking.opensour.com/best/";
 			flag = ServiceConnection.FLAG_BEST;
@@ -198,5 +212,15 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	public void setOnLocationClickListener(
 			OnLocationClickListener onLocationClickListener) {
 		this.onLocationClickListener = onLocationClickListener;
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		//TODO agregar los datos a la instancia
+		if(retrievedString!=null){
+			savedInstanceState.putString("api_response", retrievedString);
+			savedInstanceState.putInt("flag", retrievedFlag );
+		}
+	    super.onSaveInstanceState(savedInstanceState);
 	}
 }

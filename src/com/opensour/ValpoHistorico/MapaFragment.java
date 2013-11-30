@@ -303,6 +303,11 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	@Override
 	public void onMarkerDragStart(Marker marker) {
 		// TODO Auto-generated method stub
-		
+	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+		//TODO agregar los datos a la instancia
+	    super.onSaveInstanceState(savedInstanceState);
 	}
 }

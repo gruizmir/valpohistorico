@@ -2,6 +2,7 @@
     android:id="@+id/text_entry"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
     android:background="@drawable/cercanos_shape"
     android:textSize="18sp"
     android:clickable="true"
