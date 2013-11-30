@@ -44,7 +44,7 @@
                 android:paddingBottom="10dp"
                 android:paddingLeft="10dp"
                 android:paddingTop="10dp"
-                android:text="@string/facebook"
+                android:text="@string/share"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp" />
 
@@ -60,7 +60,7 @@
                 android:paddingBottom="10dp"
                 android:paddingLeft="10dp"
                 android:paddingTop="10dp"
-                android:text="@string/twitter"
+                android:text="@string/share"
                 android:textColor="#FFFFFF"
                 android:textSize="15sp" />
         </LinearLayout>
