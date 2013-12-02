@@ -46,7 +46,8 @@
                 android:paddingTop="10dp"
                 android:text="@string/share"
                 android:textColor="#FFFFFF"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                />
 
             <Button
                 android:id="@+id/share_twitter"
@@ -67,11 +68,11 @@
 
         <ImageView
             android:id="@+id/info_image"
-            android:layout_width="170dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:contentDescription="@string/default_img_desc"
-            android:maxHeight="160dp"
+            android:maxHeight="350dp"
             android:minHeight="140dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_launcher" />
@@ -116,7 +117,10 @@
         <TextView
             android:id="@+id/info_body"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            />
     </LinearLayout>
 
 </ScrollView>

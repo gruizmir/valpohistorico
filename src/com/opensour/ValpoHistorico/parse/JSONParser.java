@@ -80,4 +80,68 @@ public class JSONParser {
 
 		return temp;
 	}
+	
+	
+	
+	public ArrayList<String> parseImageList(String data){
+		ArrayList<String> lista = new ArrayList<String>();
+		JsonReader reader;
+		try {
+			reader = new JsonReader(
+					new InputStreamReader(
+							new ByteArrayInputStream(data.getBytes()), "UTF-8"));
+			reader.beginArray();
+			while (reader.hasNext()) {
+				String temp = readURL(reader);
+				if(temp!=null)
+					lista.add(temp);
+			}
+			reader.endArray();
+			reader.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+		return lista;
+	}
+	
+	
+	private String readURL(JsonReader reader){
+		String img=null;
+		try {
+			reader.beginObject();
+			while (reader.hasNext()) {
+				String name = reader.nextName();
+				if(name.equals("fields")) {
+					img = readImg(reader);
+				} else {
+					reader.skipValue();
+				}
+			}
+			reader.endObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return img;
+	}
+	
+	private String readImg(JsonReader reader){
+		String imgURI=null;
+		try {
+			reader.beginObject();
+			while (reader.hasNext()) {
+				String name = reader.nextName();
+				if (name.equals("img"))
+					imgURI = reader.nextString();
+				else 
+					reader.skipValue();
+			}
+			reader.endObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return imgURI;
+	}
 }

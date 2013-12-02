@@ -77,7 +77,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		View rootView = inflater.inflate(R.layout.info_layout, container, false);
 		title = (TextView) rootView.findViewById(R.id.info_title);
 		body = (TextView) rootView.findViewById(R.id.info_body);
-		//		img = (ImageView) rootView.findViewById(R.id.info_image);
+		img = (ImageView) rootView.findViewById(R.id.info_image);
 		infoTable = (TableLayout) rootView.findViewById(R.id.info_next_table);
 		extraInfo = (LinearLayout) rootView.findViewById(R.id.info_extra_data);
 
@@ -149,7 +149,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		}
 
 		//Agregando los atributos del objecto.
-		this.infoTable.removeAllViews();
+		infoTable.removeAllViews();
 		Set<String> col = entry.getAtributos().keySet();
 		Iterator<String> it = col.iterator();
 		while(it.hasNext()){
@@ -172,7 +172,8 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			infoTable.addView(tr);
 		}
 
-		this.body.setText(Html.fromHtml(entry.getTexto()));
+		body.setText(Html.fromHtml(entry.getTexto()));
+		img.setImageBitmap(entry.getImg());
 		if(title!=null)
 			title.setText(titleText);
 	}
@@ -207,8 +208,23 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 
 		}
 	}
+	
+	public void sendObj(String attr, String value){
+		SearchObject obj = new SearchObject();
+		obj.setAttribute(attr);
+		obj.setValue(value);
+		if(attr.equals("Tiene coordenadas"))
+			obj.setPosition(true);
+		onRelatedSearchListener.onRelatedSearch(obj);
+	}
 
-
+	
+	/*
+	 * Funciones de los listeners y semejantes.
+	 */
+	
+	
+	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -253,15 +269,6 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		mHandler.sendEmptyMessage(0);
 	}
 
-	public void sendObj(String attr, String value){
-		SearchObject obj = new SearchObject();
-		obj.setAttribute(attr);
-		obj.setValue(value);
-		if(attr.equals("Tiene coordenadas"))
-			obj.setPosition(true);
-		onRelatedSearchListener.onRelatedSearch(obj);
-	}
-
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -292,7 +299,6 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	/*
 	 * Setters y Getters
 	 */
-
 
 	public String getTitleText() {
 		return titleText;

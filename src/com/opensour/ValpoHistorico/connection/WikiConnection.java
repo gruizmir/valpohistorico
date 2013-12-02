@@ -147,26 +147,6 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 					.concat("&eq=yes");
 	}
 	
-	public String getUrlBase() {
-		return urlBase;
-	}
-
-	public void setUrlBase(String urlBase) {
-		this.urlBase = urlBase;
-	}
-
-	public String getFormat() {
-		return format;
-	}
-
-	public void setFormat(String format) {
-		this.format = format;
-	}
-	
-	public void setFlag(String flag){
-		this.flag = flag;
-	}
-
 	@Override
 	protected String doInBackground(String... urls) {
 		try {
@@ -196,6 +176,31 @@ public class WikiConnection extends AsyncTask<String, Integer, String> {
 	
 	protected void onPostExecute(Long result) {
     }
+	
+	
+	/*
+	 * Setter y getters
+	 */
+	
+	public String getUrlBase() {
+		return urlBase;
+	}
+
+	public void setUrlBase(String urlBase) {
+		this.urlBase = urlBase;
+	}
+
+	public String getFormat() {
+		return format;
+	}
+
+	public void setFormat(String format) {
+		this.format = format;
+	}
+	
+	public void setFlag(String flag){
+		this.flag = flag;
+	}
 
 	public OnDataReceivedListener getOnDataReceivedListener() {
 		return onDataReceivedListener;
