@@ -23,11 +23,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
+import com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -38,7 +41,11 @@ import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
 import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
 import com.opensour.ValpoHistorico.parse.InfoParser;
 
-public class MapaFragment extends Fragment implements LocationListener, OnInfoWindowClickListener, OnDataReceivedListener, OnMarkerDragListener {
+public class MapaFragment extends Fragment implements LocationListener, 
+		OnInfoWindowClickListener, OnDataReceivedListener, OnMarkerDragListener,
+		OnMyLocationButtonClickListener, 
+		GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener{
 	public static final String ARG_SECTION_NUMBER = "section_number";
 	private GoogleMap map;
 	private OnLocationClickListener onLocationClickListener;
@@ -54,6 +61,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	private Marker myPosition;
 	private View rootView;
 	private InfoParser parser = new InfoParser();
+	private LocationClient lClient;
 	
 	@SuppressLint("HandlerLeak")
 	private final Handler mHandler = new Handler() {
@@ -66,9 +74,9 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 				hechosReady=true;
 			if(lugaresReady && hechosReady){
 				displayData();
-				if(progressDialog!=null && progressDialog.isShowing())
-					progressDialog.dismiss();
 			}
+			if(progressDialog!=null && progressDialog.isShowing())
+				progressDialog.dismiss();
 		}
 	};
 
@@ -89,7 +97,9 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		
 		SupportMapFragment fm = (SupportMapFragment) this.getFragmentManager().findFragmentById(R.id.map);
 		map = fm.getMap();
+		lClient = new LocationClient(this.getActivity(), this, this);
 		map.setMyLocationEnabled(true);
+		map.setOnMyLocationButtonClickListener(this);
 		int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this.getActivity().getBaseContext());
 		if(status!=ConnectionResult.SUCCESS){ // Google Play Services are not available
 			int requestCode = 10;
@@ -102,27 +112,31 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			location = locationManager.getLastKnownLocation(provider);
 			if(location!=null){
 				onLocationChanged(location);
-				
 			}
-			locationManager.requestLocationUpdates(provider, 20000, 0, this);
+			locationManager.requestLocationUpdates(provider, 200000, 0, this);
 		}
 		lista = new ArrayList<WikiObject>();
+		
+		return rootView;
+	}
+
+	public void retrieveData(LatLng position){
 		if(WikiConnection.isConnected(getActivity())){
 			progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
 			WikiConnection conn = new WikiConnection();
 			conn.setOnDataReceivedListener(this);
 			String coordenadas;
-			if(location!=null){
-				coordenadas = Double.toString(location.getLatitude())
+			if(position!=null){
+				coordenadas = Double.toString(position.latitude)
 						.concat(",")
-						.concat(Double.toString(location.getLongitude()))
+						.concat(Double.toString(position.longitude))
 						.concat(" (")
 						.concat(RADIO)
 						.concat(")");
 				coordenadas = "Tiene coordenadas=".concat(coordenadas);
 			}
 			else{
-				Log.e("location", "null");
+				Log.e("position", "null");
 				coordenadas= "ubicado en=Valparaíso";
 			}
 			String[] args = {coordenadas};
@@ -135,7 +149,7 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			WikiConnection hechosConn = new WikiConnection();
 			hechosConn.setOnDataReceivedListener(this);
 			String hechosCoord;
-			if(location!=null){
+			if(position!=null){
 				hechosCoord = coordenadas;
 			}
 			else{
@@ -148,54 +162,8 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
 			hechosConn.execute(urlBase);
 		}
-		return rootView;
 	}
-
-	@Override
-	public void onLocationChanged(Location location) {
-		double latitude = location.getLatitude();
-		double longitude = location.getLongitude();
-		LatLng latLng = new LatLng(latitude, longitude);
-		map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-		map.animateCamera(CameraUpdateFactory.zoomTo(14));
-		myPosition = map.addMarker(new MarkerOptions()
-					.title("Desplázame!")
-					.draggable(true)
-					.position(latLng)
-					.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
-				);
-		map.setOnMarkerDragListener(this);
-	}
-
-	@Override
-	public void onProviderDisabled(String provider) {}
-
-	@Override
-	public void onProviderEnabled(String provider) {}
-
-	@Override
-	public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-	public OnLocationClickListener getOnLocationClickListener() {
-		return onLocationClickListener;
-	}
-
-	public void setOnLocationClickListener(OnLocationClickListener onLocationClickListener) {
-		this.onLocationClickListener = onLocationClickListener;
-	}
-
-	@Override
-	public void onInfoWindowClick(Marker marker) {
-		LatLng position = marker.getPosition();
-		String title = marker.getTitle();
-		if(onLocationClickListener != null){
-			Bundle extras = new Bundle();
-			extras.putString("name", title);
-			extras.putDouble("latitude", position.latitude);
-			extras.putDouble("longitude", position.longitude);
-			onLocationClickListener.onLocationClick(extras); 
-		}
-	}
+	
 	
 	private void displayData(){
 		ValpoApp myApp = (ValpoApp)this.getActivity().getApplication();
@@ -230,6 +198,62 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		map.setOnInfoWindowClickListener(this);
 	}
 	
+	
+	
+	
+	/*
+	 * LocationListener method's implementation
+	 */
+	
+	@Override
+	public void onLocationChanged(Location location) {
+		map.clear();
+		double latitude = location.getLatitude();
+		double longitude = location.getLongitude();
+		LatLng latLng = new LatLng(latitude, longitude);
+		map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+		map.animateCamera(CameraUpdateFactory.zoomTo(14));
+		myPosition = map.addMarker(new MarkerOptions()
+					.title("Desplázame!")
+					.draggable(true)
+					.position(latLng)
+					.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+				);
+		map.setOnMarkerDragListener(this);
+		retrieveData(latLng);
+	}
+
+	@Override
+	public void onProviderDisabled(String provider) {}
+
+	@Override
+	public void onProviderEnabled(String provider) {}
+
+	@Override
+	public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+	/*
+	 * OnInfoWindowClickListener method's implementation 
+	 */
+
+	@Override
+	public void onInfoWindowClick(Marker marker) {
+		LatLng position = marker.getPosition();
+		String title = marker.getTitle();
+		if(onLocationClickListener != null){
+			Bundle extras = new Bundle();
+			extras.putString("name", title);
+			extras.putDouble("latitude", position.latitude);
+			extras.putDouble("longitude", position.longitude);
+			onLocationClickListener.onLocationClick(extras); 
+		}
+	}
+	
+	
+	/*
+	 * OnDataReceivedListener method's implementation 
+	 */
+	
 	@Override
 	public void onReceive(Bundle data) {
 		Message msg = new Message();
@@ -237,12 +261,9 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 		mHandler.sendMessage(msg);
 	}
 	
-	@Override
-	public void onPause() {
-	    super.onPause();
-	    locationManager.removeUpdates(this);
-	}
-
+	/*
+	 * OnMarkerDragListener method's implementation
+	 */
 	@Override
 	public void onMarkerDrag(Marker marker) {
 		// TODO Auto-generated method stub
@@ -258,46 +279,8 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 			.position(marker.getPosition())
 			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
 		LatLng position = marker.getPosition();
-		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
 		lista = new ArrayList<WikiObject>();
-		
-		WikiConnection conn = new WikiConnection();
-		conn.setOnDataReceivedListener(this);
-		String coordenadas;
-		if(position!=null){
-			coordenadas = Double.toString(position.latitude)
-					.concat(",")
-					.concat(Double.toString(position.longitude))
-					.concat(" (")
-					.concat(RADIO)
-					.concat(")");
-			coordenadas = "Tiene coordenadas=".concat(coordenadas);
-		}
-		else{
-			coordenadas= "ubicado en=Valparaíso";
-		}
-		String[] args = {coordenadas};
-		String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
-		String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
-		conn.setInfo(args, categories, fields);
-		conn.setFlag(WikiConnection.FLAG_LUGARES);
-		conn.execute(urlBase);
-		
-		WikiConnection hechosConn = new WikiConnection();
-		hechosConn.setOnDataReceivedListener(this);
-		String hechosCoord;
-		if(location!=null){
-			hechosCoord = coordenadas;
-		}
-		else{
-			hechosCoord= "ocurrido en=Valparaíso";
-		}
-		String[] hechosArgs = {hechosCoord};
-		String[] hechosCategories = {"Categoría:Hecho"};
-		String[] hechosFields = { "Categoría", "Tiene coordenadas"};
-		hechosConn.setInfo(hechosArgs, hechosCategories, hechosFields);
-		hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
-		hechosConn.execute(urlBase);
+		retrieveData(position);
 	}
 
 	@Override
@@ -309,5 +292,77 @@ public class MapaFragment extends Fragment implements LocationListener, OnInfoWi
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		//TODO agregar los datos a la instancia
 	    super.onSaveInstanceState(savedInstanceState);
+	}
+
+	@Override
+	public boolean onMyLocationButtonClick() {
+		Location loc = lClient.getLastLocation();
+		this.onLocationChanged(loc);
+		return false;
+	}
+	
+	@Override
+	public void onPause() {
+	    super.onPause();
+	    locationManager.removeUpdates(this);
+	}
+	
+	
+	/*
+	 *  GooglePlayServicesClient.ConnectionCallbacks method's implementation 
+	 */
+	
+	@Override
+	public void onConnected(Bundle connectionHint) {
+		
+	}
+
+	@Override
+	public void onDisconnected() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	
+	/* 
+	 * GooglePlayServicesClient.OnConnectionFailedListener
+	 */
+	
+	@Override
+	public void onConnectionFailed(ConnectionResult result) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
+	/* 
+	 * Fragment actions' overrides.
+	 */
+	
+	@Override
+	public void onStart() {
+        super.onStart();
+        // Connect the client.
+        lClient.connect();
+    }
+	
+	@Override
+	public void onStop() {
+        // Disconnecting the client invalidates it.
+        lClient.disconnect();
+        super.onStop();
+    }
+	
+	
+	/*
+	 * Setter y getters
+	 */
+	public OnLocationClickListener getOnLocationClickListener() {
+		return onLocationClickListener;
+	}
+
+	public void setOnLocationClickListener(OnLocationClickListener onLocationClickListener) {
+		this.onLocationClickListener = onLocationClickListener;
 	}
 }
