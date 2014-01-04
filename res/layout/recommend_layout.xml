@@ -16,9 +16,12 @@
             android:orientation="horizontal"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
-            android:weightSum="1.0" >
+            android:weightSum="1.0"
+            style="?android:attr/buttonBarStyle"
+            >
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/recommend_reload"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -29,6 +32,7 @@
                 android:layout_weight="0.5" />
 
             <Button
+                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/recommend_hipster"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -17,4 +17,5 @@
     <string name="share" translatable="false">Compartir </string>
     <string name="facebook" translatable="false">Compartir en Facebook</string>
     <string name="twitter" translatable="false">Compartir en Twitter</string>
+    <string name="related_title_text" translatable="false">Relacionados</string>
 </resources>

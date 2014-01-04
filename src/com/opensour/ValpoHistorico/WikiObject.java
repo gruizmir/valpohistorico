@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.opensour.ValpoHistorico.connection.ImageDownloadConnection;
 import com.opensour.ValpoHistorico.connection.WikiConnection;
@@ -32,6 +31,7 @@ public class WikiObject implements OnDataReceivedListener{
 	private Boolean atributosReceived = false;
 	private Boolean imgReceived = false;
 	private OnDataReceivedListener onDataReceivedListener;
+	private ArrayList<ObjectLink> linkedObjects;
 
 	public void addAtributo(String key, String value){
 		if(atributos==null)
@@ -122,6 +122,7 @@ public class WikiObject implements OnDataReceivedListener{
 			this.atributosReceived=true;
 			if(textoReceived==true && imgReceived==true)
 				onDataReceivedListener.onReceive(null);
+			setLinkedObjects(parser.getInverseObjects());
 			return;
 		}
 		if(flag.equals("img_list")){
@@ -220,5 +221,13 @@ public class WikiObject implements OnDataReceivedListener{
 
 	public void setOnDataReceivedListener(OnDataReceivedListener onDataReceivedListener) {
 		this.onDataReceivedListener = onDataReceivedListener;
+	}
+
+	public ArrayList<ObjectLink> getLinkedObjects() {
+		return linkedObjects;
+	}
+
+	public void setLinkedObjects(ArrayList<ObjectLink> linkedObjects) {
+		this.linkedObjects = linkedObjects;
 	}
 }

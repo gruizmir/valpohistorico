@@ -44,6 +44,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private TextView body;
 	private ImageView img;
 	private TableLayout infoTable;
+	private TableLayout relatedTable;
 	private LinearLayout extraInfo;
 	private ArrayList<WikiObject> lista;
 	private WikiObject entry;
@@ -79,6 +80,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		body = (TextView) rootView.findViewById(R.id.info_body);
 		img = (ImageView) rootView.findViewById(R.id.info_image);
 		infoTable = (TableLayout) rootView.findViewById(R.id.info_next_table);
+		relatedTable = (TableLayout) rootView.findViewById(R.id.info_related_objects);
 		extraInfo = (LinearLayout) rootView.findViewById(R.id.info_extra_data);
 
 		if(savedInstanceState!=null){
@@ -170,6 +172,26 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 				}
 			});
 			infoTable.addView(tr);
+		}
+		
+		// Agregando los elementos relacionados a este objeto.
+		relatedTable.removeAllViews();
+		Iterator<ObjectLink> relIt = entry.getLinkedObjects().iterator();
+		while(relIt.hasNext()){
+			ObjectLink temp= relIt.next();
+			TableRow tr = (TableRow) this.getLayoutInflater(null).inflate(R.layout.table_row, null);
+			TextView tv = (TextView) tr.getChildAt(0);
+			Button tb = (Button) tr.getChildAt(1);
+			tv.setText(temp.getLinkedObject().getNombre());
+			tb.setText(temp.getProperty());
+			tb.setContentDescription(temp.getLinkedObject().getNombre());
+			tb.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View arg0) {				
+//					sendObj(((Button)arg0).getContentDescription().toString(), ((Button)arg0).getText().toString());
+				}
+			});
+			relatedTable.addView(tr);
 		}
 
 		body.setText(Html.fromHtml(entry.getTexto()));
