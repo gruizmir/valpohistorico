@@ -195,7 +195,12 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		}
 
 		body.setText(Html.fromHtml(entry.getTexto()));
-		img.setImageBitmap(entry.getImg());
+		if(entry.getImg()!=null){
+			img.setImageBitmap(entry.getImg());
+			img.setVisibility(View.VISIBLE);
+		}
+		else
+			img.setVisibility(View.GONE);
 		if(title!=null)
 			title.setText(titleText);
 	}

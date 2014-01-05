@@ -141,7 +141,7 @@ public class MapaFragment extends Fragment implements LocationListener,
 			}
 			String[] args = {coordenadas};
 			String[] categories = {"Categoría:Edificio", "Categoría:Monumento", "Categoría:Lugar", "Categoría:Museo"};
-			String[] fields = {"Tiene coordenadas", "Categoría","Cerca de"};
+			String[] fields = {"Categoría", "Tiene coordenadas"};
 			conn.setInfo(args, categories, fields);
 			conn.setFlag(WikiConnection.FLAG_LUGARES);
 			conn.execute(urlBase);

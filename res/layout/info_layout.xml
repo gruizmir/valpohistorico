@@ -72,13 +72,13 @@
 
         <ImageView
             android:id="@+id/info_image"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:contentDescription="@string/default_img_desc"
             android:maxHeight="350dp"
-            android:minHeight="140dp"
-            android:scaleType="fitCenter"
+            android:minHeight="200dp"
+            android:visibility="gone"
             android:src="@drawable/ic_launcher" />
 
         <TextView

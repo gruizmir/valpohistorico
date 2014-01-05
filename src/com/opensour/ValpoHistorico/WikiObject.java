@@ -127,12 +127,19 @@ public class WikiObject implements OnDataReceivedListener{
 		}
 		if(flag.equals("img_list")){
 			JSONParser jParser = new JSONParser();
+			Log.e("img_list", data.getString("api_response"));
 			this.imgList = jParser.parseImageList(data.getString("api_response"));
 			if(!this.imgList.isEmpty()){
 				ImageDownloadConnection imgDownloader = new ImageDownloadConnection();
 				imgDownloader.setOnDataReceivedListener(this);
 				imgDownloader.setFlag("img_download");
-				imgDownloader.execute(imgList.get(0));
+				String newName = imgList.get(0).replace("img/", "img/thumb_"); 
+				imgDownloader.execute(newName);
+			}
+			else{
+				img = null;
+				if(textoReceived==true && atributosReceived==true)
+					onDataReceivedListener.onReceive(null);
 			}
 		}
 		if(flag.equals("img_download")){

@@ -28,6 +28,7 @@
                 android:maxHeight="160dp"
                 android:minHeight="140dp"
                 android:scaleType="fitCenter"
+                android:visibility="gone"
                 android:src="@drawable/ic_launcher" />
 
             <LinearLayout
