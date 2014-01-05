@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.opensour.ValpoHistorico.connection.ServiceConnection;
 import com.opensour.ValpoHistorico.connection.WikiConnection;
@@ -102,21 +103,26 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 				.concat(" ")
 				.concat(obj.getValue());
 		subtitle.setText(texto);
-		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
-		WikiConnection relatedConn = new WikiConnection();
-		relatedConn.setOnDataReceivedListener(this);
-		String arg = "";
-		arg = arg.concat(obj.getAttribute())
-				.concat("=")
-				.concat(obj.getValue());
-		if(obj.isPosition())
-			arg = arg.concat(" (2000)");
-		String[] relatedArgs = {arg};
-		String[] relatedCategories = {};
-		String[] relatedFields = {"Categoría", obj.getAttribute()};
-		relatedConn.setInfo(relatedArgs, relatedCategories, relatedFields);
-		relatedConn.setFlag(WikiConnection.FLAG_BOTH);
-		relatedConn.execute(urlBase);
+		if(WikiConnection.isConnected(getActivity())){
+			progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
+			WikiConnection relatedConn = new WikiConnection();
+			relatedConn.setOnDataReceivedListener(this);
+			String arg = "";
+			arg = arg.concat(obj.getAttribute())
+					.concat("=")
+					.concat(obj.getValue());
+			if(obj.isPosition())
+				arg = arg.concat(" (2000)");
+			String[] relatedArgs = {arg};
+			String[] relatedCategories = {};
+			String[] relatedFields = {"Categoría", obj.getAttribute()};
+			relatedConn.setInfo(relatedArgs, relatedCategories, relatedFields);
+			relatedConn.setFlag(WikiConnection.FLAG_BOTH);
+			relatedConn.execute(urlBase);
+		}
+		else{
+			Toast.makeText(getActivity(), "No conectado", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
@@ -157,22 +163,24 @@ public class RecommendFragment extends Fragment implements OnDataReceivedListene
 	private void searchInitialRecommendation(boolean isBest){
 		String initialURL;
 		int flag;
-		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
-		if(isBest){
-			initialURL = "http://ranking.opensour.com/best/";
-			flag = ServiceConnection.FLAG_BEST;
+		if(WikiConnection.isConnected(getActivity())){
+			progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando datos",true);
+			if(isBest){
+				initialURL = "http://ranking.opensour.com/best/";
+				flag = ServiceConnection.FLAG_BEST;
+			}
+			else{
+				initialURL = "http://ranking.opensour.com/hipster/";
+				flag = ServiceConnection.FLAG_HIPSTER;
+			}
+			ServiceConnection sConnection = new ServiceConnection(initialURL);
+			sConnection.setFlag(flag);
+			sConnection.setOnDataReceivedListener(this);
+			Bundle info = new Bundle();
+	        info.putString("cant", "6");
+	        sConnection.setInfo(info);
+	        sConnection.execute();
 		}
-		else{
-			initialURL = "http://ranking.opensour.com/hipster/";
-			flag = ServiceConnection.FLAG_HIPSTER;
-		}
-		ServiceConnection sConnection = new ServiceConnection(initialURL);
-		sConnection.setFlag(flag);
-		sConnection.setOnDataReceivedListener(this);
-		Bundle info = new Bundle();
-        info.putString("cant", "6");
-        sConnection.setInfo(info);
-        sConnection.execute();
 	}
 	
 	private void showRecomendedList(boolean isBest, ArrayList<WikiObject> lista){

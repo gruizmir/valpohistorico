@@ -30,11 +30,13 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.maps.model.LatLng;
 import com.opensour.ValpoHistorico.connection.ServiceConnection;
+import com.opensour.ValpoHistorico.connection.WikiConnection;
 import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
 import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
 import com.opensour.ValpoHistorico.listeners.OnRelatedSearchListener;
@@ -100,16 +102,22 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	}
 
 	public void publishInfo(){
-		progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando ".concat(titleText),true);
-		lista = ((ValpoApp) this.getActivity().getApplication()).getLista();
-		entry = select();
-		if(entry!=null)
-			entry.retrieveData();
+		if(WikiConnection.isConnected(this.getActivity())){
+			Log.e("buscando", "publishInfo");
+			progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando ".concat(titleText),true);
+			lista = ((ValpoApp) this.getActivity().getApplication()).getLista();
+			entry = select();
+			if(entry!=null)
+				entry.retrieveData();
+			else{
+				entry = new WikiObject();
+				entry.setNombre(titleText);
+				entry.setOnDataReceivedListener(this);
+				entry.retrieveData();
+			}
+		}
 		else{
-			entry = new WikiObject();
-			entry.setNombre(titleText);
-			entry.setOnDataReceivedListener(this);
-			entry.retrieveData();
+			Toast.makeText(getActivity(), "No conectado", Toast.LENGTH_SHORT).show();
 		}
 	}
 

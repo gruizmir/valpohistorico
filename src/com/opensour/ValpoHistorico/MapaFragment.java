@@ -21,6 +21,7 @@ import android.view.InflateException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -162,6 +163,8 @@ public class MapaFragment extends Fragment implements LocationListener,
 			hechosConn.setFlag(WikiConnection.FLAG_HECHOS);
 			hechosConn.execute(urlBase);
 		}
+		else
+			Toast.makeText(getActivity(), "No conectado", Toast.LENGTH_SHORT).show();
 	}
 	
 	
