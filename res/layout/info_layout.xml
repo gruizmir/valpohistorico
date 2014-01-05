@@ -88,6 +88,7 @@
             android:layout_marginBottom="5dp"
             android:layout_marginTop="10dp"
             android:text="@string/next_here_text"
+            android:visibility="gone"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -110,13 +111,15 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TableLayout
+        <LinearLayout
             android:id="@+id/info_next_table"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:shrinkColumns="*"
-            android:stretchColumns="*" >
-        </TableLayout>
+             android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+        </LinearLayout>
         
         <TextView
             android:id="@+id/info_related_title"
@@ -125,17 +128,20 @@
             android:layout_marginBottom="5dp"
             android:layout_marginTop="10dp"
             android:text="@string/related_title_text"
+            android:visibility="gone"
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TableLayout
+        <LinearLayout
             android:id="@+id/info_related_objects"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:shrinkColumns="*"
-            android:stretchColumns="*" >
-        </TableLayout>
-
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp" >
+        </LinearLayout>
+        
         <TextView
             android:id="@+id/info_body"
             android:layout_width="match_parent"

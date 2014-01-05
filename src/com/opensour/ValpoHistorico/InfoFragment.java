@@ -45,9 +45,11 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private TextView title;
 	private TextView body;
 	private ImageView img;
-	private TableLayout infoTable;
-	private TableLayout relatedTable;
 	private LinearLayout extraInfo;
+	private LinearLayout infoTable;
+	private LinearLayout relatedLayout;
+	private TextView cercanosTitle;
+	private TextView relatedTitle;
 	private ArrayList<WikiObject> lista;
 	private WikiObject entry;
 	private String titleText;
@@ -81,10 +83,11 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		title = (TextView) rootView.findViewById(R.id.info_title);
 		body = (TextView) rootView.findViewById(R.id.info_body);
 		img = (ImageView) rootView.findViewById(R.id.info_image);
-		infoTable = (TableLayout) rootView.findViewById(R.id.info_next_table);
-		relatedTable = (TableLayout) rootView.findViewById(R.id.info_related_objects);
 		extraInfo = (LinearLayout) rootView.findViewById(R.id.info_extra_data);
-
+		infoTable = (LinearLayout) rootView.findViewById(R.id.info_next_table);
+		relatedLayout = (LinearLayout) rootView.findViewById(R.id.info_related_objects);
+		cercanosTitle = (TextView)  rootView.findViewById(R.id.info_next_here);
+		relatedTitle = (TextView)  rootView.findViewById(R.id.info_related_title);
 		if(savedInstanceState!=null){
 			try{
 				titleText = savedInstanceState.getString("title_text");
@@ -136,28 +139,39 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	}
 
 	protected void showData() {
-		//Agregando los elementos cercanos
-		String elementosCercanos = entry.getAtributos().get("Cerca de");
-		extraInfo.removeAllViews();
-		if(elementosCercanos!=null){
-			String[] elem = elementosCercanos.split(",");
-			for(int i=0; i<elem.length; i++){
-				Button btn = (Button) this.getLayoutInflater(null).inflate(R.layout.text_entry, null);
-				btn.setText(elem[i]);
-				btn.setOnClickListener(new OnClickListener(){
-					@Override
-					public void onClick(View arg0) {
-						if(onLocationClickListener != null){
-							Bundle extras = new Bundle();
-							extras.putString("name", ((Button)arg0).getText().toString());
-							onLocationClickListener.onLocationClick(extras); 
+		// Agregando los elementos cercanos
+		// No se muestran si el WikiObject es un hecho 
+		if(!entry.getCategoria().equals("Hecho") && 
+				entry.getAtributos().containsKey("Cerca de") &&
+				!entry.getAtributos().get("Cerca de").equals("")){
+			String elementosCercanos = entry.getAtributos().get("Cerca de");
+			extraInfo.removeAllViews();
+			if(elementosCercanos!=null){
+				String[] elem = elementosCercanos.split(",");
+				for(int i=0; i<elem.length; i++){
+					Button btn = (Button) this.getLayoutInflater(null).inflate(R.layout.button_entry, null);
+					btn.setText(elem[i]);
+					btn.setOnClickListener(new OnClickListener(){
+						@Override
+						public void onClick(View arg0) {
+							if(onLocationClickListener != null){
+								Bundle extras = new Bundle();
+								extras.putString("name", ((Button)arg0).getText().toString());
+								onLocationClickListener.onLocationClick(extras); 
+							}
 						}
-					}
-				});
-				extraInfo.addView(btn);
+					});
+					extraInfo.addView(btn);
+				}
 			}
+			extraInfo.setVisibility(View.VISIBLE);
+			cercanosTitle.setVisibility(View.VISIBLE);
 		}
-
+		else{
+			extraInfo.setVisibility(View.GONE);
+			cercanosTitle.setVisibility(View.GONE);
+		}
+		
 		//Agregando los atributos del objecto.
 		infoTable.removeAllViews();
 		Set<String> col = entry.getAtributos().keySet();
@@ -167,41 +181,42 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			val = entry.getAtributos().get(key);
 			if(key.equals("latitud") || key.equals("longitud"))
 				continue;
-			TableRow tr = (TableRow) this.getLayoutInflater(null).inflate(R.layout.table_row, null);
-			TextView tv = (TextView) tr.getChildAt(0);
-			Button tb = (Button) tr.getChildAt(1);
-			tv.setText(key);
-			tb.setText(val);
-			tb.setContentDescription(key);
-			tb.setOnClickListener(new OnClickListener(){
+			Button tv = (Button) this.getLayoutInflater(null).inflate(R.layout.button_entry, null);
+			String buttonText = key.concat(" ").concat(val);
+			tv.setText(buttonText);
+			tv.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View arg0) {				
 					sendObj(((Button)arg0).getContentDescription().toString(), ((Button)arg0).getText().toString());
 				}
 			});
-			infoTable.addView(tr);
+			infoTable.addView(tv);
+			infoTable.setVisibility(View.VISIBLE);
 		}
 		
 		// Agregando los elementos relacionados a este objeto.
-		relatedTable.removeAllViews();
-		Iterator<ObjectLink> relIt = entry.getLinkedObjects().iterator();
-		while(relIt.hasNext()){
-			ObjectLink temp= relIt.next();
-			TableRow tr = (TableRow) this.getLayoutInflater(null).inflate(R.layout.table_row, null);
-			TextView tv = (TextView) tr.getChildAt(0);
-			Button tb = (Button) tr.getChildAt(1);
-			tv.setText(temp.getLinkedObject().getNombre());
-			tb.setText(temp.getProperty());
-			tb.setContentDescription(temp.getLinkedObject().getNombre());
-			tb.setOnClickListener(new OnClickListener(){
-				@Override
-				public void onClick(View arg0) {				
-//					sendObj(((Button)arg0).getContentDescription().toString(), ((Button)arg0).getText().toString());
-				}
-			});
-			relatedTable.addView(tr);
+		relatedLayout.removeAllViews();
+		if(!entry.getLinkedObjects().isEmpty()){
+			Iterator<ObjectLink> relIt = entry.getLinkedObjects().iterator();
+			while(relIt.hasNext()){
+				ObjectLink temp= relIt.next();
+				TextView tv = (TextView) this.getLayoutInflater(null).inflate(R.layout.text_entry, null);
+				String sentence = temp.getLinkedObject().getNombre()
+							.concat(", ")
+							.concat(temp.getProperty().toLowerCase())
+							.concat(" ")
+							.concat(entry.getNombre());
+				tv.setText(sentence);
+				relatedLayout.addView(tv);
+			}
+			relatedLayout.setVisibility(View.VISIBLE);
+			relatedTitle.setVisibility(View.VISIBLE);
 		}
-
+		else{
+			relatedLayout.setVisibility(View.GONE);
+			relatedTitle.setVisibility(View.GONE);
+		}
+		
 		body.setText(Html.fromHtml(entry.getTexto()));
 		if(entry.getImg()!=null){
 			img.setImageBitmap(entry.getImg());
