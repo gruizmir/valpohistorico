@@ -27,21 +27,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.FacebookDialog;
 import com.google.android.gms.maps.model.LatLng;
+import com.opensour.ValpoHistorico.connection.ImageDownloadConnection;
 import com.opensour.ValpoHistorico.connection.ServiceConnection;
 import com.opensour.ValpoHistorico.connection.WikiConnection;
 import com.opensour.ValpoHistorico.listeners.OnDataReceivedListener;
 import com.opensour.ValpoHistorico.listeners.OnLocationClickListener;
 import com.opensour.ValpoHistorico.listeners.OnRelatedSearchListener;
 
-public class InfoFragment extends Fragment implements OnDataReceivedListener {
+public class InfoFragment extends Fragment implements OnDataReceivedListener{
 	private TextView title;
 	private TextView body;
 	private ImageView img;
@@ -60,6 +59,7 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	private OnLocationClickListener onLocationClickListener;
 	private OnRelatedSearchListener onRelatedSearchListener;
 	public static final String ARG_SECTION_NUMBER = "section_number";
+	public static final String FULL_IMAGE_FLAG= "full_image";
 	public static final int TWITTER_ACTION = 10;
 	private UiLifecycleHelper uiHelper;
 	private String key;
@@ -72,7 +72,10 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		public void handleMessage(Message msg) {
 			if(progressDialog!=null && progressDialog.isShowing())
 				progressDialog.dismiss();
-			showData();
+			if(msg.getData().getString("flag", "default").equals(FULL_IMAGE_FLAG))
+				openImage(msg.getData());
+			else
+				showData();
 		}
 	};
 
@@ -106,7 +109,6 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 
 	public void publishInfo(){
 		if(WikiConnection.isConnected(this.getActivity())){
-			Log.e("buscando", "publishInfo");
 			progressDialog = ProgressDialog.show(this.getActivity(), "", "Cargando ".concat(titleText),true);
 			lista = ((ValpoApp) this.getActivity().getApplication()).getLista();
 			entry = select();
@@ -182,12 +184,14 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			if(key.equals("latitud") || key.equals("longitud"))
 				continue;
 			Button tv = (Button) this.getLayoutInflater(null).inflate(R.layout.button_entry, null);
+			tv.setHint(key);
+			tv.setContentDescription(val);
 			String buttonText = key.concat(" ").concat(val);
 			tv.setText(buttonText);
 			tv.setOnClickListener(new OnClickListener(){
 				@Override
 				public void onClick(View arg0) {				
-					sendObj(((Button)arg0).getContentDescription().toString(), ((Button)arg0).getText().toString());
+					sendObj(((Button)arg0).getHint().toString(), ((Button)arg0).getContentDescription().toString());
 				}
 			});
 			infoTable.addView(tv);
@@ -220,6 +224,15 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 		body.setText(Html.fromHtml(entry.getTexto()));
 		if(entry.getImg()!=null){
 			img.setImageBitmap(entry.getImg());
+			img.setOnClickListener(new OnClickListener(){
+				@Override
+				public void onClick(View v) {
+					ImageDownloadConnection conn = new ImageDownloadConnection();
+					conn.setFlag(FULL_IMAGE_FLAG);
+					conn.setOnDataReceivedListener(InfoFragment.this);
+					conn.execute(entry.getImgName());
+				}
+			});
 			img.setVisibility(View.VISIBLE);
 		}
 		else
@@ -240,11 +253,11 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			.build();
 			uiHelper.trackPendingDialogCall(shareDialog.present());
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
+	
 	public void shareOnTwitter(){
 		try {
 			String text = "Estuve en " + this.titleText;
@@ -253,11 +266,11 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			Uri uri = Uri.parse(tweetUrl);
 			startActivityForResult(new Intent(Intent.ACTION_VIEW, uri), TWITTER_ACTION);
 		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
 			Log.e("share", "twitter", e);
 
 		}
 	}
+	
 	
 	public void sendObj(String attr, String value){
 		SearchObject obj = new SearchObject();
@@ -267,14 +280,18 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 			obj.setPosition(true);
 		onRelatedSearchListener.onRelatedSearch(obj);
 	}
-
+	
+	
+	private void openImage(Bundle data) {
+		Intent i = new Intent(this.getActivity(), BigImageDisplay.class);
+		i.putExtras(data);
+		this.startActivity(i);
+	}
+	
 	
 	/*
 	 * Funciones de los listeners y semejantes.
 	 */
-	
-	
-	
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -316,7 +333,9 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 
 	@Override
 	public void onReceive(Bundle data) {
-		mHandler.sendEmptyMessage(0);
+		Message m = new Message();
+		m.setData(data);
+		mHandler.sendMessage(m);
 	}
 
 	@Override
@@ -412,5 +431,4 @@ public class InfoFragment extends Fragment implements OnDataReceivedListener {
 	public void setOnRelatedSearchListener(OnRelatedSearchListener onRelatedSearchListener) {
 		this.onRelatedSearchListener = onRelatedSearchListener;
 	}
-
 }

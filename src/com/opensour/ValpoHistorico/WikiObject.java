@@ -21,6 +21,7 @@ public class WikiObject implements OnDataReceivedListener{
 	private String nombre;
 	private String texto;
 	private String categoria;
+	private String imgName;
 	private Bitmap img;
 	private ArrayList<String> imgList; //No se debe acceder desde fuera del objeto
 	private int facebookCount = 0;
@@ -127,13 +128,13 @@ public class WikiObject implements OnDataReceivedListener{
 		}
 		if(flag.equals("img_list")){
 			JSONParser jParser = new JSONParser();
-			Log.e("img_list", data.getString("api_response"));
 			this.imgList = jParser.parseImageList(data.getString("api_response"));
 			if(!this.imgList.isEmpty()){
 				ImageDownloadConnection imgDownloader = new ImageDownloadConnection();
 				imgDownloader.setOnDataReceivedListener(this);
 				imgDownloader.setFlag("img_download");
-				String newName = imgList.get(0).replace("img/", "img/thumb_"); 
+				imgName = imgList.get(0);
+				String newName = imgName.replace("img/", "img/thumb_"); 
 				imgDownloader.execute(newName);
 			}
 			else{
@@ -236,5 +237,13 @@ public class WikiObject implements OnDataReceivedListener{
 
 	public void setLinkedObjects(ArrayList<ObjectLink> linkedObjects) {
 		this.linkedObjects = linkedObjects;
+	}
+
+	public String getImgName() {
+		return imgName;
+	}
+
+	public void setImgName(String imgName) {
+		this.imgName = imgName;
 	}
 }

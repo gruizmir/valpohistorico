@@ -18,4 +18,5 @@
     <string name="facebook" translatable="false">Compartir en Facebook</string>
     <string name="twitter" translatable="false">Compartir en Twitter</string>
     <string name="related_title_text" translatable="false">Relacionados</string>
+    <string name="big_img_text" translatable="false">Imagen en alta resolución</string>
 </resources>
